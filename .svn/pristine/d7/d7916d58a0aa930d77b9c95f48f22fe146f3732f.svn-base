@@ -1,0 +1,144 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    android:orientation="vertical"
+    tools:context=".SelectWorld" >
+
+    <LinearLayout
+        android:id="@+id/linearOpacity"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#00000000"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:id="@+id/numquestion"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.08"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/categoryAnswer"
+                style="@style/numquestion"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.08"
+                android:visibility="invisible" />
+
+            <TextView
+                android:id="@+id/numQuestion"
+                style="@style/numquestion"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.12"
+                android:gravity="center"
+                android:visibility="invisible" />
+
+            <TextView
+                android:id="@+id/userScore"
+                style="@style/edit_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.08"
+                android:gravity="right"
+                android:visibility="visible" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/question"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.27"
+            android:gravity="top|center"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textQuestion"
+                style="@style/question"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:gravity="center_horizontal"
+                android:visibility="invisible" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/timer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_margin="0dp"
+            android:layout_weight="0.25"
+            android:gravity="bottom"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/textTimer"
+                style="@style/text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="-4dp"
+                android:background="@drawable/reloj"
+                android:visibility="visible" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/answer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.5"
+            android:background="@color/black"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/firstAnswer"
+                style="@style/question"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/background_button_answer"
+                android:clickable="false"
+                android:visibility="invisible" />
+
+            <Button
+                android:id="@+id/secondAnswer"
+                style="@style/question"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/background_button_answer"
+                android:clickable="false"
+                android:visibility="invisible" />
+
+            <Button
+                android:id="@+id/thirdAnswer"
+                style="@style/question"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/background_button_answer"
+                android:clickable="false"
+                android:visibility="invisible" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/frikiadosBanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="-1dp"
+            android:background="@color/black"
+            android:gravity="bottom"
+            android:orientation="horizontal" >
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

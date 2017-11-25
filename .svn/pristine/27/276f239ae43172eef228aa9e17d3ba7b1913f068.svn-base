@@ -1,0 +1,45 @@
+package com.appyuken.frikiados.menu;
+
+import com.appyuken.frikiados.*;
+
+import android.os.Bundle;
+import android.app.Activity;
+import android.view.Menu;
+import android.app.Dialog;
+import android.content.Context;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
+
+public class ProfileActivity extends Activity 
+{
+	private ImageButton btIzqComodines, btDerComodines, btVolver, btTienda, btIzqEstadisticas, btDerEstadisticas;
+	private Animation animPushLeftIn, animPushLeftOut, animPushRightIn, animPushRightOut;
+	private RelativeLayout seccionComodines1, seccionComodines2, seccionComodines3, seccionComodines4, layoutComodines, layoutEstadisticas, seccionEstadisticas1, seccionEstadisticas2, seccionEstadisticas3, seccionEstadisticas4, seccionEstadisticas5;
+	private boolean flagSeccionComodines1, flagSeccionComodines2, flagSeccionComodines3, flagSeccionComodines4, flagSeccionEst1, flagSeccionEst2, flagSeccionEst3, flagSeccionEst4, flagSeccionEst5;
+	private ImageView comodin;
+	private Context context = this;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) 
+	{
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_profile);
+		
+
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.profile, menu);
+		return true;
+	}
+
+}

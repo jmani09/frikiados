@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background"
+    android:layout_gravity="center"
+    tools:context=".SelectWorld" >
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal">
+
+        <ImageView
+            android:id="@+id/imgRayo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/rayo_1"
+            android:contentDescription="@+id/frikiadosImage"
+            android:gravity="center"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/logoJefe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/logo"
+            android:contentDescription="@+id/frikiadosImage"
+            android:gravity="center"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/imgHumoOne"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/logoJefe"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/humo_1"
+            android:contentDescription="@+id/frikiadosImage"
+            android:gravity="center"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/imgJefe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/logoJefe"
+            android:layout_marginTop="10dp"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/jefe_1"
+            android:contentDescription="@+id/frikiadosImage"
+            android:gravity="center"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/imgHumoTwo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/logoJefe"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="70dp"
+            android:background="@drawable/humo_1"
+            android:contentDescription="@+id/frikiadosImage"
+            android:gravity="center"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/textJefeComic"
+            style="@style/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/imgJefe"
+            android:text="@string/frikiados_boss_comic" />
+        
+        <Button
+            android:id="@+id/btnBoss"
+            style="@style/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:layout_marginTop="5dp"
+            android:layout_below="@+id/textJefeComic"
+            android:background="@drawable/background_btn_main"
+            android:gravity="center"
+            android:text="@string/btnBoss"
+            android:visibility="visible" />
+    </RelativeLayout>
+
+</LinearLayout>

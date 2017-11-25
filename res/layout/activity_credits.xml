@@ -1,0 +1,197 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/background"
+    tools:context=".CreditsActivity" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/textCreditsActivity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/logo_creditos"
+            android:contentDescription="@+id/frikiadosImage"
+            android:gravity="center_horizontal" />
+
+        <TextView
+            android:id="@+id/titleFrikiados"
+            style="@style/edit_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textCreditsActivity"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="40dp"
+            android:text="@string/app_name" />
+
+        <TextView
+            android:id="@+id/firstOwner"
+            style="@style/credits_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/titleFrikiados"
+            android:layout_centerHorizontal="true"
+            android:text="@string/firstOwner" />
+
+        <TextView
+            android:id="@+id/secondOwner"
+            style="@style/credits_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/firstOwner"
+            android:layout_centerHorizontal="true"
+            android:text="@string/secondOwner" />
+
+        <TextView
+            android:id="@+id/thirdOwner"
+            style="@style/credits_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/secondOwner"
+            android:layout_centerHorizontal="true"
+            android:text="@string/thirdOwner" />
+
+        <View
+            android:id="@+id/line"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/thirdOwner"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/dark_gray" />
+
+        <TextView
+            android:id="@+id/titleSoundDesign"
+            style="@style/edit_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/line"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="@string/designSound" />
+
+        <TextView
+            android:id="@+id/ownerSound"
+            style="@style/credits_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/titleSoundDesign"
+            android:layout_centerHorizontal="true"
+            android:text="@string/ownerSound" />
+        <TextView
+            android:id="@+id/ownerMusic1"
+            style="@style/credits_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ownerSound"
+            android:layout_centerHorizontal="true"
+            android:text="@string/ownerMusic1" />
+        <TextView
+            android:id="@+id/ownerMusic2"
+            style="@style/credits_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ownerMusic1"
+            android:layout_centerHorizontal="true"
+            android:text="@string/ownerMusic2" />
+
+        <View
+            android:id="@+id/line2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/ownerMusic2"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/dark_gray" />
+
+        <TextView
+            android:id="@+id/specialCollaboration"
+            style="@style/edit_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/line2"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="@string/specialCollaborations" />
+
+        <TextView
+            android:id="@+id/firstCollaboration"
+            style="@style/credits_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/specialCollaboration"
+            android:layout_centerHorizontal="true"
+            android:text="@string/firstCollaboration" />
+        <TextView
+            android:id="@+id/secondCollaboration"
+            style="@style/credits_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/firstCollaboration"
+            android:layout_centerHorizontal="true"
+            android:text="@string/secondCollaboration" />
+        <View
+            android:id="@+id/line3"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/secondCollaboration"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/dark_gray" />
+
+        <TextView
+            android:id="@+id/socialNetwork"
+            style="@style/edit_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/line3"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="@string/socialNetwork" />
+
+        <TextView
+            android:id="@+id/facebook"
+            style="@style/credits_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/socialNetwork"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/color_textview_onclick"
+            android:text="@string/facebook"
+            android:clickable="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true" />
+        <TextView
+            android:id="@+id/twitter"
+            style="@style/credits_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/facebook"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/color_textview_onclick"
+            android:text="@string/twitter"
+            android:clickable="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true" />
+        <TextView
+            android:id="@+id/instagram"
+            style="@style/credits_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/twitter"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/color_textview_onclick"
+            android:text="@string/instagram" 
+            android:clickable="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"/>
+    </RelativeLayout>
+
+</ScrollView>

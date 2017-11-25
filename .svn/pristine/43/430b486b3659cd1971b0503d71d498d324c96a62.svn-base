@@ -1,0 +1,677 @@
+package com.appyuken.model;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import android.annotation.SuppressLint;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
+import com.appyuken.frikiados.classes.Question;
+import com.appyuken.frikiados.classes.SessionManager;
+
+@SuppressLint("UseValueOf")
+public class QuestionDAO extends SQLiteOpenHelper {
+
+	// private static String DB_DIR =
+	// "/data/data/com.appyuken.frikiados/databases/";
+	private static String DB_NAME = "frikiados.sqlite";
+	private static String TABLE_NAME = "QUESTION";
+	// private static String DB_PATH = DB_DIR + DB_NAME;
+	// private static String OLD_DB_PATH = DB_DIR + "old_" + DB_NAME;
+	private static final int DATABASE_VERSION = 1;
+	private static final String KEY_ID = "id";
+
+	private final Context myContext;
+	private SessionManager sessionManager;
+
+	// private boolean createDatabase = false;
+	// private boolean upgradeDatabase = false;
+	// private SessionManager sessionManager;
+
+	protected static final String TAG_ID_QUESTION = "IdQuestion";
+	protected static final String TAG_TEXT_QUESTION = "QuestionText";
+	protected static final String TAG_ANSWER_ONE_QUESTION = "Answer1";
+	protected static final String TAG_ANSWER_TWO_QUESTION = "Answer2";
+	protected static final String TAG_ANSWER_THREE_QUESTION = "Answer3";
+	protected static final String TAG_CORRECT_ANSWER_QUESTION = "CorrectAnswer";
+	protected static final String TAG_GENRE_QUESTION = "Genre";
+	protected static final String TAG_DIFFICULTY_QUESTION = "Difficulty";
+	protected static final String TAG_TIMES_APPEARED_QUESTION = "TimesAppeared";
+	protected static final String TAG_LAST_UPDATE_QUESTION = "LastUpdate";
+
+	/**
+	 * Constructor Takes and keeps a reference of the passed context in order to
+	 * access to the application assets and resources.
+	 * 
+	 * @param context
+	 */
+	public QuestionDAO(Context context) {
+		super(context, DB_NAME, null, DATABASE_VERSION);
+		myContext = context;
+		// Get the path of the database that is based on the context.
+		// DB_PATH = myContext.getDatabasePath(DB_NAME).getAbsolutePath();
+		// sessionManager = new SessionManager(myContext);
+	}
+
+	/**
+	 * Upgrade the database in internal storage if it exists but is not current.
+	 * Create a new empty database in internal storage if it does not exist.
+	 */
+
+	@Override
+	public void onCreate(SQLiteDatabase db) {
+		/*
+		 * Signal that a new database needs to be copied. The copy process must
+		 * be performed after the database in the cache has been closed causing
+		 * it to be committed to internal storage. Otherwise the database in
+		 * internal storage will not have the same creation timestamp as the one
+		 * in the cache causing the database in internal storage to be marked as
+		 * corrupted.
+		 */
+		// SQL statement to create book table
+		String CREATE_QUESTIONS_TABLE = "CREATE TABLE IF NOT EXISTS `QUESTION`"
+				+ "(" + TAG_ID_QUESTION + " int(11) PRIMARY KEY NOT NULL,"
+				+ TAG_TEXT_QUESTION + " varchar(120) NOT NULL,"
+				+ TAG_ANSWER_ONE_QUESTION + " varchar(50) NOT NULL,"
+				+ TAG_ANSWER_TWO_QUESTION + " varchar(50) NOT NULL,"
+				+ TAG_ANSWER_THREE_QUESTION + " varchar(50) NOT NULL,"
+				+ TAG_CORRECT_ANSWER_QUESTION + " int(1) NOT NULL,"
+				+ TAG_DIFFICULTY_QUESTION + " int(1) NOT NULL,"
+				+ TAG_GENRE_QUESTION + " varchar(1) NOT NULL,"
+				+ TAG_LAST_UPDATE_QUESTION + " int(11) NOT NULL,"
+				+ TAG_TIMES_APPEARED_QUESTION + " int(11) NOT NULL );";
+
+		// create books table
+		db.execSQL(CREATE_QUESTIONS_TABLE);
+		
+	}
+
+	/**
+	 * Called only if version number was changed and the database has already
+	 * been created. Copying a database from the application package assets to
+	 * the internal data system inside this method will result in a corrupted
+	 * database in the internal data system.
+	 */
+	@Override
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		/*
+		 * Signal that the database needs to be upgraded for the copy method of
+		 * creation. The copy process must be performed after the database has
+		 * been opened or the database will be corrupted.
+		 */
+		// upgradeDatabase = true;
+
+		// Drop older books table if existed
+		db.execSQL("DROP TABLE IF EXISTS notis");
+
+		// create fresh books table
+		this.onCreate(db);
+	}
+
+	/**
+	 * Called everytime the database is opened by getReadableDatabase or
+	 * getWritableDatabase. This is called after onCreate or onUpgrade is
+	 * called.
+	 */
+	@Override
+	public void onOpen(SQLiteDatabase db) {
+		super.onOpen(db);
+	}
+
+	@SuppressLint("UseValueOf")
+	public ArrayList<Question> obtenerPreguntas(int numeroPreguntas) {
+		ArrayList<Question> listaPreguntas = new ArrayList<Question>();
+		ArrayList<Question> listaPreguntasManga = new ArrayList<Question>();
+		ArrayList<Question> listaPreguntasComic = new ArrayList<Question>();
+		ArrayList<Question> listaPreguntasVideoJuegos = new ArrayList<Question>();
+		ArrayList<Question> listaPreguntasPeliculas = new ArrayList<Question>();
+		ArrayList<Question> listaPreguntasSeries = new ArrayList<Question>();
+
+		// Aquí va toda la lógica de BBDD sqlite para acceder a la bd y obtener
+		// las x preguntas (numeroPreguntas)
+		// 1. build the query
+		String query = "SELECT t1.IdQuestion, t1.QuestionText, t1.Answer1, t1.Answer2, t1.Answer3, t1.CorrectAnswer, t1.TimesAppeared,"
+				+ " t1.Genre, t1.Difficulty FROM QUESTION t1 WHERE Difficulty > 0 AND Difficulty < 5 AND Genre = 'Manga'";
+
+		// 2. get reference to writable DB
+		SQLiteDatabase db = this.getWritableDatabase();
+		Cursor cursor = db.rawQuery(query, null);
+
+		// 3. go over each row, build book and add it to list
+		Question question = null;
+		if (cursor.moveToFirst()) {
+			do {
+				question = new Question();
+				question.setQuestionId(Integer.parseInt(cursor.getString(0)));
+				question.setQuestionText(cursor.getString(1));
+				question.setAnswer1(cursor.getString(2));
+				question.setAnswer2(cursor.getString(3));
+				question.setAnswer3(cursor.getString(4));
+				question.setCorrectAnswer(Integer.parseInt(cursor.getString(5)));
+				question.setTimesAppeared(Integer.parseInt(cursor.getString(6)));
+				question.setGenre(cursor.getString(7));
+				question.setDifficulty(Integer.parseInt(cursor.getString(8)));
+				Log.d("Pregunta ", "texto: " + cursor.getString(1));
+				Log.d("Respuesta 1", "texto: " + cursor.getString(2));
+				Log.d("Respuesta 2", "texto: " + cursor.getString(3));
+				Log.d("Respuesta 3", "texto: " + cursor.getString(4));
+				Log.d("Veces aparecida: ", cursor.getString(6));
+				Log.d("Genero: ", cursor.getString(7));
+				Log.d("id: ", cursor.getString(0));
+				// Add quetions to listofquestions
+				listaPreguntasManga.add(question);
+			} while (cursor.moveToNext());
+		}
+
+		String query2 = "SELECT t1.IdQuestion, t1.QuestionText, t1.Answer1, t1.Answer2, t1.Answer3, t1.CorrectAnswer, t1.TimesAppeared,"
+				+ " t1.Genre, t1.Difficulty FROM QUESTION t1 WHERE Difficulty > 0 AND Difficulty < 5 AND Genre = 'Cómic'";
+
+		cursor = db.rawQuery(query2, null);
+
+		// 3. go over each row, build book and add it to list
+		if (cursor.moveToFirst()) {
+			do {
+				question = new Question();
+				question.setQuestionId(Integer.parseInt(cursor.getString(0)));
+				question.setQuestionText(cursor.getString(1));
+				question.setAnswer1(cursor.getString(2));
+				question.setAnswer2(cursor.getString(3));
+				question.setAnswer3(cursor.getString(4));
+				question.setCorrectAnswer(Integer.parseInt(cursor.getString(5)));
+				question.setTimesAppeared(Integer.parseInt(cursor.getString(6)));
+				question.setGenre(cursor.getString(7));
+				question.setDifficulty(Integer.parseInt(cursor.getString(8)));
+				Log.d("Pregunta ", "texto: " + cursor.getString(1));
+				Log.d("Respuesta 1", "texto: " + cursor.getString(2));
+				Log.d("Respuesta 2", "texto: " + cursor.getString(3));
+				Log.d("Respuesta 3", "texto: " + cursor.getString(4));
+				Log.d("Veces aparecida: ", cursor.getString(6));
+				Log.d("Genero: ", cursor.getString(7));
+				Log.d("id: ", cursor.getString(0));
+				// Add quetions to listofquestions
+				listaPreguntasComic.add(question);
+			} while (cursor.moveToNext());
+		}
+
+		String query3 = "SELECT t1.IdQuestion, t1.QuestionText, t1.Answer1, t1.Answer2, t1.Answer3, t1.CorrectAnswer, t1.TimesAppeared,"
+				+ " t1.Genre, t1.Difficulty FROM QUESTION t1 WHERE Difficulty > 0 AND Difficulty < 5 AND Genre = 'Películas'";
+
+		// 2. get reference to writable DB
+		cursor = db.rawQuery(query3, null);
+
+		// 3. go over each row, build book and add it to list
+		if (cursor.moveToFirst()) {
+			do {
+				question = new Question();
+				question.setQuestionId(Integer.parseInt(cursor.getString(0)));
+				question.setQuestionText(cursor.getString(1));
+				question.setAnswer1(cursor.getString(2));
+				question.setAnswer2(cursor.getString(3));
+				question.setAnswer3(cursor.getString(4));
+				question.setCorrectAnswer(Integer.parseInt(cursor.getString(5)));
+				question.setTimesAppeared(Integer.parseInt(cursor.getString(6)));
+				question.setGenre(cursor.getString(7));
+				question.setDifficulty(Integer.parseInt(cursor.getString(8)));
+				Log.d("Pregunta ", "texto: " + cursor.getString(1));
+				Log.d("Respuesta 1", "texto: " + cursor.getString(2));
+				Log.d("Respuesta 2", "texto: " + cursor.getString(3));
+				Log.d("Respuesta 3", "texto: " + cursor.getString(4));
+				Log.d("Veces aparecida: ", cursor.getString(6));
+				Log.d("id: ", cursor.getString(0));
+				// Add quetions to listofquestions
+				listaPreguntasPeliculas.add(question);
+			} while (cursor.moveToNext());
+		}
+		String query4 = "SELECT t1.IdQuestion, t1.QuestionText, t1.Answer1, t1.Answer2, t1.Answer3, t1.CorrectAnswer, t1.TimesAppeared,"
+				+ " t1.Genre, t1.Difficulty FROM QUESTION t1 WHERE Difficulty > 0 AND Difficulty < 5 AND Genre = 'Series'";
+
+		// 2. get reference to writable DB
+		cursor = db.rawQuery(query4, null);
+
+		// 3. go over each row, build book and add it to list
+		if (cursor.moveToFirst()) {
+			do {
+				question = new Question();
+				question.setQuestionId(Integer.parseInt(cursor.getString(0)));
+				question.setQuestionText(cursor.getString(1));
+				question.setAnswer1(cursor.getString(2));
+				question.setAnswer2(cursor.getString(3));
+				question.setAnswer3(cursor.getString(4));
+				question.setCorrectAnswer(Integer.parseInt(cursor.getString(5)));
+				question.setTimesAppeared(Integer.parseInt(cursor.getString(6)));
+				question.setGenre(cursor.getString(7));
+				question.setDifficulty(Integer.parseInt(cursor.getString(8)));
+				Log.d("Pregunta ", "texto: " + cursor.getString(1));
+				Log.d("Respuesta 1", "texto: " + cursor.getString(2));
+				Log.d("Respuesta 2", "texto: " + cursor.getString(3));
+				Log.d("Respuesta 3", "texto: " + cursor.getString(4));
+				Log.d("Veces aparecida: ", cursor.getString(6));
+				Log.d("id: ", cursor.getString(0));
+				// Add quetions to listofquestions
+				listaPreguntasSeries.add(question);
+			} while (cursor.moveToNext());
+		}
+		String query5 = "SELECT t1.IdQuestion, t1.QuestionText, t1.Answer1, t1.Answer2, t1.Answer3, t1.CorrectAnswer, t1.TimesAppeared,"
+				+ " t1.Genre, t1.Difficulty FROM QUESTION t1 WHERE Difficulty > 0 AND Difficulty < 5 AND Genre = 'Videojuegos'";
+
+		// 2. get reference to writable DB
+		cursor = db.rawQuery(query5, null);
+
+		// 3. go over each row, build book and add it to list
+		if (cursor.moveToFirst()) {
+			do {
+				question = new Question();
+				question.setQuestionId(Integer.parseInt(cursor.getString(0)));
+				question.setQuestionText(cursor.getString(1));
+				question.setAnswer1(cursor.getString(2));
+				question.setAnswer2(cursor.getString(3));
+				question.setAnswer3(cursor.getString(4));
+				question.setCorrectAnswer(Integer.parseInt(cursor.getString(5)));
+				question.setTimesAppeared(Integer.parseInt(cursor.getString(6)));
+				question.setGenre(cursor.getString(7));
+				question.setDifficulty(Integer.parseInt(cursor.getString(8)));
+				Log.d("Pregunta", "texto: " + cursor.getString(1));
+				Log.d("Respuesta 1", "texto: " + cursor.getString(2));
+				Log.d("Respuesta 2", "texto: " + cursor.getString(3));
+				Log.d("Respuesta 3", "texto: " + cursor.getString(4));
+				Log.d("Veces aparecida: ", cursor.getString(6));
+				Log.d("id: ", cursor.getString(0));
+				// Add quetions to listofquestions
+				listaPreguntasVideoJuegos.add(question);
+			} while (cursor.moveToNext());
+		}
+
+		// Log.d("getAllNotis()", listaPreguntas.toString());
+		Collections.sort(listaPreguntasManga, new Comparator<Question>() {
+			@Override
+			public int compare(Question q1, Question q2) {
+				// TODO Auto-generated method stub
+				return new Integer(q1.getTimesAppeared())
+						.compareTo(new Integer(q2.getTimesAppeared()));
+			}
+		});
+		Collections.sort(listaPreguntasSeries, new Comparator<Question>() {
+			@Override
+			public int compare(Question q1, Question q2) {
+				// TODO Auto-generated method stub
+				return new Integer(q1.getTimesAppeared())
+						.compareTo(new Integer(q2.getTimesAppeared()));
+			}
+		});
+		Collections.sort(listaPreguntasPeliculas, new Comparator<Question>() {
+			@Override
+			public int compare(Question q1, Question q2) {
+				// TODO Auto-generated method stub
+				return new Integer(q1.getTimesAppeared())
+						.compareTo(new Integer(q2.getTimesAppeared()));
+			}
+		});
+		Collections.sort(listaPreguntasComic, new Comparator<Question>() {
+			@Override
+			public int compare(Question q1, Question q2) {
+				// TODO Auto-generated method stub
+				return new Integer(q1.getTimesAppeared())
+						.compareTo(new Integer(q2.getTimesAppeared()));
+			}
+		});
+		Collections.sort(listaPreguntasVideoJuegos, new Comparator<Question>() {
+			@Override
+			public int compare(Question q1, Question q2) {
+				// TODO Auto-generated method stub
+				return new Integer(q1.getTimesAppeared())
+						.compareTo(new Integer(q2.getTimesAppeared()));
+			}
+		});
+
+		for (int i = 0; i < 71; i++) {
+			if (i<listaPreguntasComic.size()) {
+				listaPreguntas.add(listaPreguntasComic.get(i));
+			} 
+			if (i<listaPreguntasManga.size()) {
+				listaPreguntas.add(listaPreguntasManga.get(i));
+			} 
+			if (i<listaPreguntasPeliculas.size()) {
+				listaPreguntas.add(listaPreguntasPeliculas.get(i));
+			} 
+			if (i<listaPreguntasSeries.size()) {
+				listaPreguntas.add(listaPreguntasSeries.get(i));
+			} 
+			if (i<listaPreguntasVideoJuegos.size()) {
+				listaPreguntas.add(listaPreguntasVideoJuegos.get(i));
+			}
+
+		}
+		System.out.println("Tamaño lista preguntas: " + listaPreguntas.size());
+		return listaPreguntas;
+	}
+
+	public boolean doesDatabaseExist(Context context, String dbName) {
+		File dbFile = context.getDatabasePath(dbName);
+		return dbFile.exists();
+	}
+
+	public void addQuestion(List<Question> questions, Context applicationContext) {
+		sessionManager = new SessionManager(applicationContext);
+		System.out.println("Aqui entra, bbdd: " + sessionManager.isCreateBBDD());
+		// 1. get reference to writable DB
+		SQLiteDatabase db = this.getWritableDatabase();
+		int i = 0;
+
+		for (Question question : questions) {
+			// 2.create ContentValues to add key "column"/value
+			ContentValues values = new ContentValues();
+			values.put(TAG_ID_QUESTION, question.getQuestionId());
+			values.put(TAG_TEXT_QUESTION, question.getQuestionText());
+			values.put(TAG_ANSWER_ONE_QUESTION, question.getAnswer1());
+			values.put(TAG_ANSWER_TWO_QUESTION, question.getAnswer2());
+			values.put(TAG_ANSWER_THREE_QUESTION, question.getAnswer3());
+			values.put(TAG_CORRECT_ANSWER_QUESTION, question.getCorrectAnswer());
+			values.put(TAG_GENRE_QUESTION, question.getGenre());
+			values.put(TAG_DIFFICULTY_QUESTION, question.getDifficulty());// get
+			values.put(TAG_TIMES_APPEARED_QUESTION, question.getTimesAppeared()); // title
+			values.put(TAG_LAST_UPDATE_QUESTION, question.getLastUpdate());
+
+			// 3. insert
+			db.replace(TABLE_NAME, // table
+					null, // nullColumnHack
+					values); // key/value -> keys = column names/ values =
+								// column values
+
+			// 4. close
+			System.out.println("Question añadida numero " + i++);
+
+		}
+		sessionManager.createBBDD();
+		db.close();
+
+	}
+	public void updateQuestion(List<Question> questions) {
+		// TODO Auto-generated method stub
+		System.out.println("Update");
+		SQLiteDatabase db = this.getWritableDatabase();
+		for (Question question : questions) {
+			ContentValues values = new ContentValues();
+			values.put(TAG_TEXT_QUESTION, question.getQuestionText());
+			values.put(TAG_ANSWER_ONE_QUESTION, question.getAnswer1());
+			values.put(TAG_ANSWER_TWO_QUESTION, question.getAnswer2());
+			values.put(TAG_ANSWER_THREE_QUESTION, question.getAnswer3());
+			values.put(TAG_CORRECT_ANSWER_QUESTION, question.getCorrectAnswer());
+			values.put(TAG_GENRE_QUESTION, question.getGenre());
+			values.put(TAG_DIFFICULTY_QUESTION, question.getDifficulty());// get
+			values.put(TAG_TIMES_APPEARED_QUESTION, question.getTimesAppeared()); // title
+			values.put(TAG_LAST_UPDATE_QUESTION, question.getLastUpdate()); // get title
+			int i = db
+					.update(TABLE_NAME, // table
+							values, // column/value
+							TAG_ID_QUESTION + " = ?", // selections
+							new String[] { String.valueOf(question
+									.getQuestionId()) });
+		}
+		db.close();
+	}
+
+	public void saveTimesAppeared(ArrayList<ResumeLevel> resumeLevel) {
+		// TODO Auto-generated method stub
+		// 1. get reference to writable DB
+		SQLiteDatabase db = this.getWritableDatabase();
+		System.out.println("salvando veces aparecidas");
+		// 2. create ContentValues to add key "column"/value
+
+		for (ResumeLevel resumeLeve : resumeLevel) {
+			ContentValues values = new ContentValues();
+			values.put(TAG_TIMES_APPEARED_QUESTION,
+					resumeLeve.getTimesAppeared() + 1); // get title
+
+			// 3. updating row
+			int i = db
+					.update(TABLE_NAME, // table
+							values, // column/value
+							TAG_ID_QUESTION + " = ?", // selections
+							new String[] { String.valueOf(resumeLeve
+									.getQuestionId()) });
+		}
+		// selection args
+
+		// 4. close
+		db.close();
+
+	}
+
+	public ArrayList<Question> obtenerPreguntasBoss(int numeroPreguntas) {
+		// TODO Auto-generated method stub
+		ArrayList<Question> listaPreguntas = new ArrayList<Question>(
+				numeroPreguntas);
+		ArrayList<Question> listaPreguntasManga = new ArrayList<Question>();
+		ArrayList<Question> listaPreguntasComic = new ArrayList<Question>();
+		ArrayList<Question> listaPreguntasVideoJuegos = new ArrayList<Question>();
+		ArrayList<Question> listaPreguntasPeliculas = new ArrayList<Question>();
+		ArrayList<Question> listaPreguntasSeries = new ArrayList<Question>();
+
+		// Aquí va toda la lógica de BBDD sqlite para acceder a la bd y obtener
+				// las x preguntas (numeroPreguntas)
+				// 1. build the query
+				String query = "SELECT t1.IdQuestion, t1.QuestionText, t1.Answer1, t1.Answer2, t1.Answer3, t1.CorrectAnswer, t1.TimesAppeared,"
+						+ " t1.Genre, t1.Difficulty FROM QUESTION t1 WHERE Difficulty = 5 AND Genre = 'Manga'";
+
+				// 2. get reference to writable DB
+				SQLiteDatabase db = this.getWritableDatabase();
+				Cursor cursor = db.rawQuery(query, null);
+
+				// 3. go over each row, build book and add it to list
+				Question question = null;
+				if (cursor.moveToFirst()) {
+					do {
+						question = new Question();
+						question.setQuestionId(Integer.parseInt(cursor.getString(0)));
+						question.setQuestionText(cursor.getString(1));
+						question.setAnswer1(cursor.getString(2));
+						question.setAnswer2(cursor.getString(3));
+						question.setAnswer3(cursor.getString(4));
+						question.setCorrectAnswer(Integer.parseInt(cursor.getString(5)));
+						question.setTimesAppeared(Integer.parseInt(cursor.getString(6)));
+						question.setGenre(cursor.getString(7));
+						question.setDifficulty(Integer.parseInt(cursor.getString(8)));
+						Log.d("Pregunta ", "texto: " + cursor.getString(1));
+						Log.d("Respuesta 1", "texto: " + cursor.getString(2));
+						Log.d("Respuesta 2", "texto: " + cursor.getString(3));
+						Log.d("Respuesta 3", "texto: " + cursor.getString(4));
+						Log.d("Veces aparecida: ", cursor.getString(6));
+						Log.d("Genero: ", cursor.getString(7));
+						Log.d("id: ", cursor.getString(0));
+						// Add quetions to listofquestions
+						listaPreguntasManga.add(question);
+					} while (cursor.moveToNext());
+				}
+
+				String query2 = "SELECT t1.IdQuestion, t1.QuestionText, t1.Answer1, t1.Answer2, t1.Answer3, t1.CorrectAnswer, t1.TimesAppeared,"
+						+ " t1.Genre, t1.Difficulty FROM QUESTION t1 WHERE Difficulty = 5 AND Genre = 'Cómic'";
+
+				cursor = db.rawQuery(query2, null);
+
+				// 3. go over each row, build book and add it to list
+				if (cursor.moveToFirst()) {
+					do {
+						question = new Question();
+						question.setQuestionId(Integer.parseInt(cursor.getString(0)));
+						question.setQuestionText(cursor.getString(1));
+						question.setAnswer1(cursor.getString(2));
+						question.setAnswer2(cursor.getString(3));
+						question.setAnswer3(cursor.getString(4));
+						question.setCorrectAnswer(Integer.parseInt(cursor.getString(5)));
+						question.setTimesAppeared(Integer.parseInt(cursor.getString(6)));
+						question.setGenre(cursor.getString(7));
+						question.setDifficulty(Integer.parseInt(cursor.getString(8)));
+						Log.d("Pregunta ", "texto: " + cursor.getString(1));
+						Log.d("Respuesta 1", "texto: " + cursor.getString(2));
+						Log.d("Respuesta 2", "texto: " + cursor.getString(3));
+						Log.d("Respuesta 3", "texto: " + cursor.getString(4));
+						Log.d("Veces aparecida: ", cursor.getString(6));
+						Log.d("Genero: ", cursor.getString(7));
+						Log.d("id: ", cursor.getString(0));
+						// Add quetions to listofquestions
+						listaPreguntasComic.add(question);
+					} while (cursor.moveToNext());
+				}
+
+				String query3 = "SELECT t1.IdQuestion, t1.QuestionText, t1.Answer1, t1.Answer2, t1.Answer3, t1.CorrectAnswer, t1.TimesAppeared,"
+						+ " t1.Genre, t1.Difficulty FROM QUESTION t1 WHERE Difficulty = 5 AND Genre = 'Películas'";
+
+				// 2. get reference to writable DB
+				cursor = db.rawQuery(query3, null);
+
+				// 3. go over each row, build book and add it to list
+				if (cursor.moveToFirst()) {
+					do {
+						question = new Question();
+						question.setQuestionId(Integer.parseInt(cursor.getString(0)));
+						question.setQuestionText(cursor.getString(1));
+						question.setAnswer1(cursor.getString(2));
+						question.setAnswer2(cursor.getString(3));
+						question.setAnswer3(cursor.getString(4));
+						question.setCorrectAnswer(Integer.parseInt(cursor.getString(5)));
+						question.setTimesAppeared(Integer.parseInt(cursor.getString(6)));
+						question.setGenre(cursor.getString(7));
+						question.setDifficulty(Integer.parseInt(cursor.getString(8)));
+						Log.d("Pregunta ", "texto: " + cursor.getString(1));
+						Log.d("Respuesta 1", "texto: " + cursor.getString(2));
+						Log.d("Respuesta 2", "texto: " + cursor.getString(3));
+						Log.d("Respuesta 3", "texto: " + cursor.getString(4));
+						Log.d("Veces aparecida: ", cursor.getString(6));
+						Log.d("id: ", cursor.getString(0));
+						// Add quetions to listofquestions
+						listaPreguntasPeliculas.add(question);
+					} while (cursor.moveToNext());
+				}
+				String query4 = "SELECT t1.IdQuestion, t1.QuestionText, t1.Answer1, t1.Answer2, t1.Answer3, t1.CorrectAnswer, t1.TimesAppeared,"
+						+ " t1.Genre, t1.Difficulty FROM QUESTION t1 WHERE Difficulty = 5 AND Genre = 'Series'";
+
+				// 2. get reference to writable DB
+				cursor = db.rawQuery(query4, null);
+
+				// 3. go over each row, build book and add it to list
+				if (cursor.moveToFirst()) {
+					do {
+						question = new Question();
+						question.setQuestionId(Integer.parseInt(cursor.getString(0)));
+						question.setQuestionText(cursor.getString(1));
+						question.setAnswer1(cursor.getString(2));
+						question.setAnswer2(cursor.getString(3));
+						question.setAnswer3(cursor.getString(4));
+						question.setCorrectAnswer(Integer.parseInt(cursor.getString(5)));
+						question.setTimesAppeared(Integer.parseInt(cursor.getString(6)));
+						question.setGenre(cursor.getString(7));
+						question.setDifficulty(Integer.parseInt(cursor.getString(8)));
+						Log.d("Pregunta ", "texto: " + cursor.getString(1));
+						Log.d("Respuesta 1", "texto: " + cursor.getString(2));
+						Log.d("Respuesta 2", "texto: " + cursor.getString(3));
+						Log.d("Respuesta 3", "texto: " + cursor.getString(4));
+						Log.d("Veces aparecida: ", cursor.getString(6));
+						Log.d("id: ", cursor.getString(0));
+						// Add quetions to listofquestions
+						listaPreguntasSeries.add(question);
+					} while (cursor.moveToNext());
+				}
+				String query5 = "SELECT t1.IdQuestion, t1.QuestionText, t1.Answer1, t1.Answer2, t1.Answer3, t1.CorrectAnswer, t1.TimesAppeared,"
+						+ " t1.Genre, t1.Difficulty FROM QUESTION t1 WHERE Difficulty = 5 AND Genre = 'Videojuegos'";
+
+				// 2. get reference to writable DB
+				cursor = db.rawQuery(query5, null);
+
+				// 3. go over each row, build book and add it to list
+				if (cursor.moveToFirst()) {
+					do {
+						question = new Question();
+						question.setQuestionId(Integer.parseInt(cursor.getString(0)));
+						question.setQuestionText(cursor.getString(1));
+						question.setAnswer1(cursor.getString(2));
+						question.setAnswer2(cursor.getString(3));
+						question.setAnswer3(cursor.getString(4));
+						question.setCorrectAnswer(Integer.parseInt(cursor.getString(5)));
+						question.setTimesAppeared(Integer.parseInt(cursor.getString(6)));
+						question.setGenre(cursor.getString(7));
+						question.setDifficulty(Integer.parseInt(cursor.getString(8)));
+						Log.d("Pregunta", "texto: " + cursor.getString(1));
+						Log.d("Respuesta 1", "texto: " + cursor.getString(2));
+						Log.d("Respuesta 2", "texto: " + cursor.getString(3));
+						Log.d("Respuesta 3", "texto: " + cursor.getString(4));
+						Log.d("Veces aparecida: ", cursor.getString(6));
+						Log.d("id: ", cursor.getString(0));
+						// Add quetions to listofquestions
+						listaPreguntasVideoJuegos.add(question);
+					} while (cursor.moveToNext());
+				}
+
+				// Log.d("getAllNotis()", listaPreguntas.toString());
+				Collections.sort(listaPreguntasManga, new Comparator<Question>() {
+					@Override
+					public int compare(Question q1, Question q2) {
+						// TODO Auto-generated method stub
+						return new Integer(q1.getTimesAppeared())
+								.compareTo(new Integer(q2.getTimesAppeared()));
+					}
+				});
+				Collections.sort(listaPreguntasSeries, new Comparator<Question>() {
+					@Override
+					public int compare(Question q1, Question q2) {
+						// TODO Auto-generated method stub
+						return new Integer(q1.getTimesAppeared())
+								.compareTo(new Integer(q2.getTimesAppeared()));
+					}
+				});
+				Collections.sort(listaPreguntasPeliculas, new Comparator<Question>() {
+					@Override
+					public int compare(Question q1, Question q2) {
+						// TODO Auto-generated method stub
+						return new Integer(q1.getTimesAppeared())
+								.compareTo(new Integer(q2.getTimesAppeared()));
+					}
+				});
+				Collections.sort(listaPreguntasComic, new Comparator<Question>() {
+					@Override
+					public int compare(Question q1, Question q2) {
+						// TODO Auto-generated method stub
+						return new Integer(q1.getTimesAppeared())
+								.compareTo(new Integer(q2.getTimesAppeared()));
+					}
+				});
+				Collections.sort(listaPreguntasVideoJuegos, new Comparator<Question>() {
+					@Override
+					public int compare(Question q1, Question q2) {
+						// TODO Auto-generated method stub
+						return new Integer(q1.getTimesAppeared())
+								.compareTo(new Integer(q2.getTimesAppeared()));
+					}
+				});
+
+				for (int i = 0; i < 2; i++) {
+					if (i<listaPreguntasComic.size()) {
+						listaPreguntas.add(listaPreguntasComic.get(i));
+					} 
+					if (i<listaPreguntasManga.size()) {
+						listaPreguntas.add(listaPreguntasManga.get(i));
+					} 
+					if (i<listaPreguntasPeliculas.size()) {
+						listaPreguntas.add(listaPreguntasPeliculas.get(i));
+					} 
+					if (i<listaPreguntasSeries.size()) {
+						listaPreguntas.add(listaPreguntasSeries.get(i));
+					} 
+					if (i<listaPreguntasVideoJuegos.size()) {
+						listaPreguntas.add(listaPreguntasVideoJuegos.get(i));
+					}
+
+				}
+				System.out.println("Tamaño lista preguntas: " + listaPreguntas.size());
+		return listaPreguntas;
+	}
+
+
+}

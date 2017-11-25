@@ -1,0 +1,259 @@
+package com.appyuken.xmlParser;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xmlpull.v1.XmlSerializer;
+
+import com.appyuken.frikiados.Frikiados;
+import com.appyuken.frikiados.classes.FileHelper;
+import com.appyuken.frikiados.classes.SessionManager;
+
+import android.content.Context;
+import android.os.Environment;
+import android.util.Log;
+import android.util.Xml;
+
+public class LevelParser {
+	private static String DB_DIR = "/data/data/com.appyuken.frikiados/databases/";
+	private SessionManager sessionManager;
+
+	public LevelParser() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public Document getDocument(InputStream inputStream) {
+		Document document = null;
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		try {
+			DocumentBuilder db = factory.newDocumentBuilder();
+			InputSource inputSource = new InputSource(inputStream);
+			document = db.parse(inputSource);
+		} catch (ParserConfigurationException e) {
+			Log.e("Error: ", e.getMessage());
+			return null;
+		} catch (SAXException e) {
+			Log.e("Error: ", e.getMessage());
+			return null;
+		} catch (IOException e) {
+			Log.e("Error: ", e.getMessage());
+			return null;
+		}
+		return document;
+	}
+
+	public String getValue(Element item, String str) {
+		NodeList n = item.getElementsByTagName(str);
+		return this.getTextNodeValue(n.item(0));
+	}
+
+	private final String getTextNodeValue(Node node) {
+		Node child;
+		if (node != null) {
+			if (node.hasChildNodes()) {
+				child = node.getFirstChild();
+				while (child != null) {
+					if (child.getNodeType() == Node.TEXT_NODE) {
+						return child.getNodeValue();
+					}
+					child = child.getNextSibling();
+				}
+			}
+		}
+		return "";
+	}
+
+	public final String getElementValue(Node elem) {
+		Node child;
+
+		if (elem != null) {
+			if (elem.hasChildNodes()) {
+				for (child = elem.getFirstChild(); child != null; child = child
+						.getNextSibling()) {
+					if (child.getNodeType() == Node.TEXT_NODE) {
+						return child.getNodeValue();
+					}
+				}
+			}
+		}
+
+		return "";
+	}
+
+	public void copyXmlWorlds(Context context) {
+		File toPath = Environment.getExternalStoragePublicDirectory(DB_DIR);
+		if (!toPath.exists()) {
+			System.out.println("Path  no existe");
+			toPath.mkdir();
+		} else {
+			System.out.println("Path existe");
+		}
+
+		try {
+			/*
+			 * InputStream inStream =
+			 * context.getAssets().open("levels_world_one.xml"); BufferedReader
+			 * br = new BufferedReader(new InputStreamReader( inStream)); File
+			 * toFile = new File(toPath, "levels_world_one.xml");
+			 * copyAssetFile(br, toFile);
+			 */
+			InputStream myInput = context.getAssets().open(
+					"levels_world_one.xml");
+
+			/*
+			 * Open the empty db in interal storage as the output stream.
+			 */
+			OutputStream myOutput = new FileOutputStream(DB_DIR
+					+ "levels_world_one.xml");
+
+			/*
+			 * Copy over the empty db in internal storage with the database in
+			 * the assets folder.
+			 */
+			FileHelper.copyFile(myInput, myOutput);
+
+		} catch (IOException e) {
+		}
+	}
+
+	public void createXMLWorldsFilesWorldOne(Context frikiContext) {
+		sessionManager = new SessionManager(frikiContext);
+		File newxmlfile = new File(DB_DIR + "levels_world_one.xml");
+		try {
+			newxmlfile.createNewFile();
+		} catch (IOException e) {
+			Log.e("IOException", "Exception in create new File(");
+		}
+		FileOutputStream fileos = null;
+		try {
+			fileos = new FileOutputStream(newxmlfile);
+
+		} catch (FileNotFoundException e) {
+			Log.e("FileNotFoundException", e.toString());
+		}
+		XmlSerializer serializer = Xml.newSerializer();
+		try {
+			serializer.setOutput(fileos, "UTF-8");
+			serializer.startDocument("UTF-8", true);
+			serializer.startTag("", "Levels");
+			// serializer.attribute("", "number",
+			// String.valueOf(messages.size()));
+			for (int i = 0; i <= 19; i++) {
+				serializer.startTag("", "Level");
+				serializer.startTag("", "Name");
+				if (i == 19) {
+					serializer.text("Chapter1LevelBoss");
+				} else {
+					serializer.text("Chapter1Level" + i + 1);
+				}
+				serializer.endTag("", "Name");
+				serializer.startTag("", "Number");
+				serializer.text(Integer.toString(i + 1));
+				serializer.endTag("", "Number");
+				serializer.startTag("", "Unlocked");
+				if (i == 0) {
+					serializer.text("1");
+				} else {
+					serializer.text("0");
+				}
+				serializer.endTag("", "Unlocked");
+				serializer.startTag("", "Stars");
+				serializer.text("0");
+				serializer.endTag("", "Stars");
+				serializer.startTag("", "Data");
+				serializer.text("Some Chapter 1 Level " + (i + 1) + " Data");
+				serializer.endTag("", "Data");
+				serializer.endTag("", "Level");
+			}
+
+			serializer.endTag("", "Levels");
+			serializer.endDocument();
+			fileos.close();
+			System.out.println("XML World 1 creado");
+			sessionManager.createXMLFiles();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public void createXMLWorldsFilesWorldTwo(Context frikiContext) {
+		sessionManager = new SessionManager(frikiContext);
+		File newxmlfile = new File(DB_DIR + "levels_world_two.xml");
+		try {
+			newxmlfile.createNewFile();
+		} catch (IOException e) {
+			Log.e("IOException", "Exception in create new File(");
+		}
+		FileOutputStream fileos = null;
+		try {
+			fileos = new FileOutputStream(newxmlfile);
+
+		} catch (FileNotFoundException e) {
+			Log.e("FileNotFoundException", e.toString());
+		}
+		XmlSerializer serializer = Xml.newSerializer();
+		try {
+			serializer.setOutput(fileos, "UTF-8");
+			serializer.startDocument("UTF-8", true);
+			serializer.startTag("", "Levels");
+			// serializer.attribute("", "number",
+			// String.valueOf(messages.size()));
+			for (int i = 0; i <= 19; i++) {
+				serializer.startTag("", "Level");
+				serializer.startTag("", "Name");
+				if (i == 19) {
+					serializer.text("Chapter1LevelBoss");
+				} else {
+					serializer.text("Chapter1Level" + i + 1);
+				}
+				serializer.endTag("", "Name");
+				serializer.startTag("", "Number");
+				serializer.text(Integer.toString(i + 1));
+				serializer.endTag("", "Number");
+				serializer.startTag("", "Unlocked");
+				if (i == 0) {
+					serializer.text("1");
+				} else {
+					serializer.text("0");
+				}
+				serializer.endTag("", "Unlocked");
+				serializer.startTag("", "Stars");
+				serializer.text("0");
+				serializer.endTag("", "Stars");
+				serializer.startTag("", "Data");
+				serializer.text("Some Chapter 1 Level " + (i + 1) + " Data");
+				serializer.endTag("", "Data");
+				serializer.endTag("", "Level");
+			}
+
+			serializer.endTag("", "Levels");
+			serializer.endDocument();
+			fileos.close();
+			sessionManager.createXMLFiles();
+			System.out.println("XML World 2 creado");
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+}

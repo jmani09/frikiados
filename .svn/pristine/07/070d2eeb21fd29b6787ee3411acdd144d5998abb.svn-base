@@ -1,0 +1,770 @@
+package com.appyuken.frikiados.menu;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.StrictMode;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnFocusChangeListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Toast;
+
+import com.appyuken.frikiados.Frikiados;
+import com.appyuken.frikiados.R;
+import com.appyuken.frikiados.classes.SessionManager;
+import com.appyuken.frikiados.classes.SoundPoolClass;
+import com.appyuken.frikiados.service.BackgroundAudiioService;
+import com.appyuken.frikiados.service.RestfulWebService;
+import com.facebook.FacebookAuthorizationException;
+import com.facebook.FacebookOperationCanceledException;
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.UiLifecycleHelper;
+import com.facebook.model.GraphUser;
+import com.facebook.widget.LoginButton;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+
+public class ProfileActivity extends FragmentActivity {
+
+	private final String PENDING_ACTION_BUNDLE_KEY = "com.facebook.samples.hellofacebook:PendingAction";
+	private static final String MY_AD_UNIT_ID = "ca-app-pub-9585973118353015/2939825487";
+	// private AdView adView;
+	private LoginButton loginButton;
+	private PendingAction pendingAction = PendingAction.NONE;
+	private GraphUser user;
+	public static Session session;
+	private SessionManager sessionManagerFrikiados;
+	private EditText frikiadosNickName;
+	private EditText frikiadosEmail;
+	private EditText frikiadosBestScore;
+	private ImageView frikiadosProfileImage;
+	private ProgressDialog dialog = null;
+	// private int numOfLifes;
+	// private TextView textNumOfLifes;
+	private HashMap<String, String> hashmap;
+	private Button saveDataProfile;
+	private ImageView frikiadosImageGender;
+	private static final String AD_UNIT_ID = "ca-app-pub-9585973118353015/9578664681";
+	private InterstitialAd interstitial;
+	private Tracker t;
+	private boolean nicknameValid = true;
+	private String emailFacebook;
+	private String birthdayFacebook;
+	private MediaPlayer mPlayerSelection;
+	private boolean clickButton = false;
+	private Intent playbackServiceIntent;
+	private SoundPoolClass soundPool;
+
+	private enum PendingAction {
+		NONE, POST_PHOTO, POST_STATUS_UPDATE
+	}
+
+	static UiLifecycleHelper uiHelper;
+
+	private Session.StatusCallback callback = new Session.StatusCallback() {
+		@Override
+		public void call(Session session, SessionState state,
+				Exception exception) {
+			onSessionStateChange(session, state, exception);
+		}
+	};
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_profile);
+		uiHelper = new UiLifecycleHelper(this, callback);
+		uiHelper.onCreate(savedInstanceState);
+
+		t = ((Frikiados) getApplication())
+				.getTracker(Frikiados.TrackerName.APP_TRACKER);
+		// Set screen name.
+		GoogleAnalytics.getInstance(this).reportActivityStart(this);
+		t.enableAdvertisingIdCollection(true);
+		playbackServiceIntent = new Intent(this, BackgroundAudiioService.class);
+
+		if (savedInstanceState != null) {
+			String name = savedInstanceState
+					.getString(PENDING_ACTION_BUNDLE_KEY);
+			pendingAction = PendingAction.valueOf(name);
+		}
+
+		// Crear adView.
+		/*
+		 * adView = new AdView(this); adView.setAdUnitId(MY_AD_UNIT_ID);
+		 * adView.setAdSize(AdSize.SMART_BANNER);
+		 */
+		// Buscar LinearLayout suponiendo que se le ha asignado
+		// el atributo android:id="@+id/mainLayout".
+		// LinearLayout layout = (LinearLayout)
+		// findViewById(R.id.frikiadosBanner);
+
+		// Añadirle adView.
+		// layout.addView(adView);
+
+		// Iniciar una solicitud genérica.
+		// AdRequest adRequest = new AdRequest.Builder().build();
+
+		// Cargar adView con la solicitud de anuncio.
+		// adView.loadAd(adRequest);
+		interstitial = new InterstitialAd(this);
+		interstitial.setAdUnitId(AD_UNIT_ID);
+
+		// Iniciar una solicitud genérica.
+		AdRequest adRequest = new AdRequest.Builder().build();
+		interstitial.loadAd(adRequest);
+
+		interstitial.setAdListener(new AdListener() {
+			@Override
+			public void onAdLoaded() {
+				displayInterstitial();
+			}
+
+			@Override
+			public void onAdClosed() {
+				// Proceed to the next level.
+			}
+		});
+
+		sessionManagerFrikiados = new SessionManager(getApplicationContext());
+		soundPool = new SoundPoolClass(getApplicationContext());
+		loginButton = (LoginButton) findViewById(R.id.login_button);
+
+		loginButton.setReadPermissions(Arrays.asList("user_likes",
+				"user_status", "email", "user_birthday"));
+		loginButton
+				.setUserInfoChangedCallback(new LoginButton.UserInfoChangedCallback() {
+					@Override
+					public void onUserInfoFetched(GraphUser user) {
+						ProfileActivity.this.user = user;
+						updateUI();
+					}
+				});
+
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		// adView.resume();
+		startService(playbackServiceIntent);
+		clickButton = false;
+		uiHelper.onResume();
+		updateUI();
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		uiHelper.onSaveInstanceState(outState);
+		outState.putString(PENDING_ACTION_BUNDLE_KEY, pendingAction.name());
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		uiHelper.onActivityResult(requestCode, resultCode, data);
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		// adView.pause();
+		uiHelper.onPause();
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		// adView.destroy();
+		uiHelper.onDestroy();
+	}
+
+	private void onSessionStateChange(Session session, SessionState state,
+			Exception exception) {
+		if (pendingAction != PendingAction.NONE
+				&& (exception instanceof FacebookOperationCanceledException || exception instanceof FacebookAuthorizationException)) {
+			new AlertDialog.Builder(ProfileActivity.this)
+					.setTitle(R.string.cancelled)
+					.setMessage(R.string.permission_not_granted)
+					.setPositiveButton(R.string.ok, null).show();
+			pendingAction = PendingAction.NONE;
+		} else if (state == SessionState.OPENED_TOKEN_UPDATED) {
+
+		} else if (state.isClosed()) {
+			Toast.makeText(getBaseContext(), "Devinculando cuenta de Facebook",
+					Toast.LENGTH_LONG).show();
+			frikiadosNickName.setText("");
+			frikiadosEmail.setText("");
+			sessionManagerFrikiados.logoutUserFacebook();
+		}
+		updateUI();
+	}
+
+	@SuppressLint("SimpleDateFormat")
+	private void updateUI() {
+
+		session = Session.getActiveSession();
+		boolean enableButtons = (session != null && session.isOpened());
+		frikiadosNickName = (EditText) findViewById(R.id.editNickName);
+		frikiadosEmail = (EditText) findViewById(R.id.editEmail);
+		frikiadosProfileImage = (ImageView) findViewById(R.id.frikiadosImageProfile);
+		// textNumOfLifes = (TextView) findViewById(R.id.numOfLifes);
+		frikiadosBestScore = (EditText) findViewById(R.id.editBestScore);
+		saveDataProfile = (Button) findViewById(R.id.btnSaveData);
+		frikiadosImageGender = (ImageView) findViewById(R.id.frikiadosImageGender);
+
+		// Comprobar vidas para dejar jugar o no
+		hashmap = sessionManagerFrikiados.getUserDetails();
+		// numOfLifes = Integer.parseInt(hashmap
+		// .get(SessionManager.KEY_NUMBER_LIFES));
+		frikiadosBestScore.setText(hashmap.get(SessionManager.KEY_BEST_SCORE)
+				+ "pts" + " / "
+				+ hashmap.get(SessionManager.KEY_NUM_OF_ANSWER_QUESTION) + "?");
+		// textNumOfLifes.setText("x" + numOfLifes);
+
+		frikiadosEmail.setClickable(false);
+		frikiadosEmail.setFocusable(false);
+		frikiadosEmail.setCursorVisible(false);
+		frikiadosEmail.setFocusableInTouchMode(false);
+		frikiadosNickName.setClickable(false);
+		frikiadosNickName.setFocusable(false);
+		frikiadosNickName.setCursorVisible(false);
+		frikiadosNickName.setFocusableInTouchMode(false);
+
+		/*if (hashmap.get(SessionManager.KEY_GENDER).equals("male")) {
+			frikiadosImageGender.setBackgroundResource(R.drawable.hombre);
+		} else {
+			frikiadosImageGender.setBackgroundResource(R.drawable.mujer);
+		}*/
+		// pickFriendsButton.setEnabled(enableButtons);
+
+		if (enableButtons && user != null) {
+			if (!sessionManagerFrikiados.isLoggedInFacebook()) {
+				/*
+				 * sessionManagerFrikiados.createLoginSessionWithFacebook(
+				 * user.getId(), user.getBirthday(),
+				 * user.asMap().get("gender").toString(), user.asMap()
+				 * .get("email").toString());
+				 */
+				// System.out.println("cumpleaños: " + user.getBirthday());
+				/*
+				 * if(user .asMap().get("email").toString()!= null && user
+				 * .asMap().get("email").toString().isEmpty()){ emailFacebook =
+				 * user .asMap().get("email").toString(); }else{ emailFacebook =
+				 * "introducetuemail@email.com"; }
+				 */
+				if (user.asMap().get("email") != null) {
+					emailFacebook = user.asMap().get("email").toString();
+				} else {
+					System.out.println("email nulo");
+					emailFacebook = "";
+				}
+				if (user.getBirthday() != null) {
+					birthdayFacebook = user.getBirthday();
+				} else {
+					System.out.println("cumpleaños nulo");
+					birthdayFacebook = "";
+				}
+
+				new frikiadosLoginAsyncTask().execute();
+			}
+		}
+		if (sessionManagerFrikiados.isLoggedInFacebook()) {
+			frikiadosNickName.setText(hashmap.get(SessionManager.KEY_NICKNAME));
+			frikiadosEmail.setText(hashmap.get(SessionManager.KEY_EMAIL));
+			frikiadosEmail.setClickable(true);
+			frikiadosEmail.setFocusable(true);
+			frikiadosEmail.setCursorVisible(true);
+			frikiadosEmail.setFocusableInTouchMode(true);
+			frikiadosNickName.setClickable(true);
+			frikiadosNickName.setFocusable(true);
+			frikiadosNickName.setCursorVisible(true);
+			frikiadosNickName.setFocusableInTouchMode(true);
+
+			if (user != null)
+				frikiadosProfileImage
+						.setImageBitmap(getFacebookProfilePicture(user.getId()));
+			frikiadosNickName
+					.setOnFocusChangeListener(new OnFocusChangeListener() {
+						@Override
+						public void onFocusChange(View v, boolean hasFocus) {
+							if (hasFocus) {
+								System.out.println("Tengo el foco");
+							} else {
+								String nickname = hashmap
+										.get(SessionManager.KEY_NICKNAME);
+								String nickname2 = frikiadosNickName.getText()
+										.toString().trim();
+								if (nickname.equalsIgnoreCase(nickname2)) {
+									System.out.println(nickname + " editText: "
+											+ nickname2);
+									nicknameValid = true;
+								} else {
+									System.out.println(nickname + " editText: "
+											+ nickname2);
+									new isValidNickNameTask().execute();
+								}
+							}
+						}
+					});
+		}
+
+		saveDataProfile.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				boolean validEmail = true;
+				boolean validNickName = true;
+				if (nicknameValid) {
+					soundPool.playSelectionSound();
+					if (sessionManagerFrikiados.isLoggedInFacebook()) {
+						if (!isValidEmail(frikiadosEmail.getText().toString())) {
+							frikiadosEmail.setError("Invalid Email");
+							validEmail = false;
+						}
+						if (frikiadosNickName.getText().toString().isEmpty()) {
+							frikiadosNickName.setError("Choose a Nickname");
+							validNickName = false;
+						} else {
+							frikiadosNickName.setError(null);
+						}
+
+						if (validEmail && validNickName) {
+							String nickname = hashmap
+									.get(SessionManager.KEY_NICKNAME);
+							String nickname2 = frikiadosNickName.getText()
+									.toString().trim();
+							String email1 = hashmap
+									.get(SessionManager.KEY_EMAIL);
+							String email2 = frikiadosEmail.getText().toString()
+									.trim();
+							if (email1 != null && email2 != null) {
+								if (nickname.equalsIgnoreCase(nickname2)
+										&& email1.equalsIgnoreCase(email2)) {
+									System.out
+											.println("Nickname e email igual no ha cambiado");
+								} else {
+									new callRestFulToSaveData().execute();
+								}
+							} else {
+								new callRestFulToSaveData().execute();
+							}
+						}
+
+					} else {
+						CharSequence text = "Debes vincular tu cuenta de Facebook para poder modificar tu perfil!";
+						int duration = Toast.LENGTH_SHORT;
+
+						Toast toast = Toast.makeText(getApplicationContext(),
+								text, duration);
+						toast.show();
+					}
+				} else {
+					CharSequence text = "Nickname ya registrado, prueba con otro!";
+					int duration = Toast.LENGTH_SHORT;
+
+					Toast toast = Toast.makeText(getApplicationContext(), text,
+							duration);
+					toast.show();
+				}
+				// Google Analytics
+				t.send(new HitBuilders.EventBuilder()
+						.setCategory("Profile Activity Events")
+						.setAction("Pressed Save Button").build());
+			}
+
+		});
+
+	}
+
+	// Clase Asíncrona
+	private class frikiadosLoginAsyncTask extends
+			AsyncTask<String, Integer, Integer> {
+
+		@Override
+		protected void onPreExecute() {
+			dialog = new ProgressDialog(ProfileActivity.this);
+			dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			dialog.setCancelable(false);
+			dialog.setMessage("Validando sus datos...");
+			if (!isFinishing()) {
+				dialog.show();
+			}
+		}
+
+		protected Integer doInBackground(String... params) {
+			// Llamo al restfulwebservice
+			return RestfulWebService.getLoginFacebook(user.getId(), "",
+					emailFacebook, birthdayFacebook, user.asMap().get("gender")
+							.toString(), getApplicationContext());
+
+		}
+
+		@Override
+		protected void onPostExecute(Integer result) {
+			super.onPostExecute(result);
+			Log.i("result", "" + result); // Pintamos por pantalla lo que nos
+											// devuelve por comprabación
+
+			switch (result) {
+			case 0:
+				// NO HAY ERROR
+				try {
+					dialog.dismiss();
+					dialog = null;
+					HashMap<String, String> hashmap = sessionManagerFrikiados
+							.getUserDetails();
+					frikiadosNickName.setText(hashmap
+							.get(SessionManager.KEY_NICKNAME));
+					frikiadosEmail.setText(hashmap
+							.get(SessionManager.KEY_EMAIL));
+					frikiadosBestScore
+							.setText(hashmap.get(SessionManager.KEY_BEST_SCORE)
+									+ "pts"
+									+ " / "
+									+ hashmap
+											.get(SessionManager.KEY_NUM_OF_ANSWER_QUESTION)
+									+ "?");
+					if (user != null)
+						frikiadosProfileImage
+								.setImageBitmap(getFacebookProfilePicture(user
+										.getId()));
+					/*if (hashmap.get(SessionManager.KEY_GENDER).equals("male")) {
+						frikiadosImageGender
+								.setBackgroundResource(R.drawable.hombre);
+					} else {
+						frikiadosImageGender
+								.setBackgroundResource(R.drawable.mujer);
+					}*/
+					frikiadosEmail.setClickable(true);
+					frikiadosEmail.setFocusable(true);
+					frikiadosEmail.setCursorVisible(true);
+					frikiadosEmail.setFocusableInTouchMode(true);
+					frikiadosNickName.setClickable(true);
+					frikiadosNickName.setFocusable(true);
+					frikiadosNickName.setCursorVisible(true);
+					frikiadosNickName.setFocusableInTouchMode(true);
+					// goToTarget = false;
+				} catch (Exception e) {
+					// nothing
+				}
+				break;
+
+			case 1:
+				try {
+					dialog.dismiss();
+					dialog = null;
+					showAlertDialogError();
+					// goToTarget = false;
+				} catch (Exception e) {
+					// nothing
+				}
+				// ERROR WEBSERVICE
+				System.out.println("Error WebService");
+				break;
+
+			case 2:
+				// ERROREXCEPTION
+				try {
+					dialog.dismiss();
+					dialog = null;
+					showAlertDialogError();
+					// goToTarget = false;
+				} catch (Exception e) {
+					// nothing
+				}
+				System.out.println("Error Exception");
+
+				break;
+			case 3:
+				// ERROREXCEPTION
+				try {
+					dialog.dismiss();
+					dialog = null;
+					showAlertDialogErrorEmailDuplicated();
+					// goToTarget = false;
+				} catch (Exception e) {
+					// nothing
+				}
+				System.out.println("Error Exception");
+
+				break;
+
+			default:
+				break;
+			}
+
+		}
+
+	} // Fin Clase Asíncrona
+
+	// Clase Asíncrona
+	private class isValidNickNameTask extends AsyncTask<String, String, String> {
+
+		@Override
+		protected void onPreExecute() {
+		}
+
+		protected String doInBackground(String... params) {
+			// Llamo al restfulwebservice
+			return RestfulWebService.isValidNickName(getApplicationContext(),
+					frikiadosNickName.getText().toString());
+
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			super.onPostExecute(result);
+			Log.i("result", "" + result); // Pintamos por pantalla lo que nos
+											// devuelve por comprabación
+			if (result.equals("true")) {
+				nicknameValid = true;
+				frikiadosNickName.setError(null);
+			} else if (result.equals("false")) {
+				nicknameValid = false;
+				frikiadosNickName.setError("NickName ya registrado");
+
+			} else {
+
+				switch (Integer.parseInt(result)) {
+
+				case 1:
+					try {
+						showAlertDialogError();
+						// goToTarget = false;
+					} catch (Exception e) {
+						// nothing
+					}
+					// ERROR WEBSERVICE
+					System.out.println("Error WebService");
+					break;
+
+				case 2:
+					// ERROREXCEPTION
+					try {
+						showAlertDialogError();
+						// goToTarget = false;
+					} catch (Exception e) {
+						// nothing
+					}
+					System.out.println("Error Exception");
+
+					break;
+
+				default:
+					break;
+				}
+			}
+
+		}
+	}// Fin Clase Asíncrona
+
+	private class callRestFulToSaveData extends
+			AsyncTask<String, Integer, Integer> {
+
+		@Override
+		protected void onPreExecute() {
+			dialog = new ProgressDialog(ProfileActivity.this);
+			dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			dialog.setCancelable(false);
+			dialog.setMessage("Validando sus datos...");
+			dialog.show();
+
+		}
+
+		protected Integer doInBackground(String... params) {
+			// Llamo al restfulwebservice
+			HashMap<String, String> hashmap = sessionManagerFrikiados
+					.getUserDetails();
+			System.out.println("id FRikiados: "
+					+ hashmap.get(SessionManager.KEY_ID_USER_FRIKIADOS)
+					+ "idfacebook: "
+					+ hashmap.get(SessionManager.KEY_FB_USER_ID) + "email: "
+					+ frikiadosEmail.getText().toString() + "nickname: "
+					+ frikiadosNickName.getText().toString());
+
+			return RestfulWebService.updateUserProfile(hashmap
+					.get(SessionManager.KEY_ID_USER_FRIKIADOS), hashmap
+					.get(SessionManager.KEY_FB_USER_ID), frikiadosEmail
+					.getText().toString(), frikiadosNickName.getText()
+					.toString(), getApplicationContext());
+
+		}
+
+		@Override
+		protected void onPostExecute(Integer result) {
+			super.onPostExecute(result);
+			Log.i("result", "" + result); // Pintamos por pantalla lo que nos
+											// devuelve por comprabación
+			switch (result) {
+			case 0:
+				// NO HAY ERROR
+				try {
+
+					dialog.dismiss();
+					dialog = null;
+					// goToTarget = false;
+				} catch (Exception e) {
+					// nothing
+				}
+				break;
+
+			case 1:
+				try {
+					dialog.dismiss();
+					dialog = null;
+					showAlertDialogError();
+					// goToTarget = false;
+				} catch (Exception e) {
+					// nothing
+				}
+				// ERROR WEBSERVICE
+				System.out.println("Error WebService");
+				break;
+
+			case 2:
+				// ERROREXCEPTION
+				try {
+					dialog.dismiss();
+					dialog = null;
+					showAlertDialogError();
+					// goToTarget = false;
+				} catch (Exception e) {
+					// nothing
+				}
+				System.out.println("Error Exception");
+
+				break;
+			case 3:
+				// ERROREXCEPTION
+				try {
+					dialog.dismiss();
+					dialog = null;
+					showAlertDialogErrorEmailDuplicated();
+					// goToTarget = false;
+				} catch (Exception e) {
+					// nothing
+				}
+				System.out.println("Error Exception");
+
+				break;
+
+			default:
+				break;
+			}
+		}
+
+	} // Fin Clase Asíncrona
+
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
+	@SuppressLint("NewApi")
+	public static Bitmap getFacebookProfilePicture(String userID) {
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+				.permitAll().build();
+		StrictMode.setThreadPolicy(policy);
+
+		URL imageURL;
+		Bitmap bitmap = null;
+		try {
+			imageURL = new URL("https://graph.facebook.com/" + userID
+					+ "/picture?type=large");
+			bitmap = BitmapFactory.decodeStream(imageURL.openConnection()
+					.getInputStream());
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return bitmap;
+	}
+
+	public void showAlertDialogErrorEmailDuplicated() {
+		// TODO Auto-generated method stub
+		Context context = getApplicationContext();
+		CharSequence text = "Email ya registrado";
+		int duration = Toast.LENGTH_SHORT;
+		Toast toast = Toast.makeText(context, text, duration);
+		toast.show();
+	}
+
+	public boolean isOnline() {
+		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo netInfo = cm.getActiveNetworkInfo();
+		if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+			return true;
+		}
+		return false;
+	}
+
+	// validating email id
+	private boolean isValidEmail(String email) {
+		String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+				+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+
+		Pattern pattern = Pattern.compile(EMAIL_PATTERN);
+		Matcher matcher = pattern.matcher(email);
+		return matcher.matches();
+	}
+
+	public void showAlertDialogError() {
+		// TODO Auto-generated method stub
+		Context context = getApplicationContext();
+		CharSequence text = "Error de conexión con el Servidor. Por favor pruebe más tarde!";
+		int duration = Toast.LENGTH_SHORT;
+		Toast toast = Toast.makeText(context, text, duration);
+		toast.show();
+	}
+
+	public void displayInterstitial() {
+		if (interstitial.isLoaded()) {
+			interstitial.show();
+		} else {
+		}
+	}
+
+	public void onStop() {
+		if (!clickButton) {
+			stopService(playbackServiceIntent);
+		}
+		GoogleAnalytics.getInstance(this).reportActivityStop(this);
+		super.onStop();
+	}
+
+	public void onBackPressed() {
+		clickButton = true;
+		finish();
+	}
+}

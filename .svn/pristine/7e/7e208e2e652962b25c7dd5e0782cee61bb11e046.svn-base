@@ -1,0 +1,178 @@
+package com.appyuken.frikiados.service;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.StringTokenizer;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.os.Build;
+import android.os.StrictMode;
+import android.util.Log;
+
+import com.appyuken.frikiados.Frikiados;
+import com.appyuken.frikiados.classes.SessionManager;
+
+
+/**
+ * Clase que proporciona la logica de negocio para interactuar con el servidor.
+ * 
+ * @version 1.0, 8/1/14
+ * @author AppYuken
+ */
+public class RestfulWebService extends RestfulWeb {
+
+	// Session Manager Class (propia clase de la app)
+	public static SessionManager sessionManagerFrikiados;
+
+	private static int TIME_OUT_CONNEXION = 0; // 12 segundos
+	private static int TIME_OUT_SOCKET = 12000; // 12 segundos
+	
+
+
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
+	@SuppressLint("NewApi")
+	public static int getLoginFacebook(String idFacebook, String nickName, String email,String birthday, String gender, Context applicationContext) 
+	{
+		// Session Manager
+		sessionManagerFrikiados = new SessionManager(applicationContext);
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+		StrictMode.setThreadPolicy(policy);
+		StringTokenizer tokens = new StringTokenizer(birthday, "/");
+		String first = tokens.nextToken();// this will contain "Fruit"
+		String second = tokens.nextToken();
+		String third = tokens.nextToken();
+		String userBirthday = third + "/" + second + "/" + first;
+
+		// Inicializao variables
+		int conexion = 1;
+
+		//HttpClient httpclient = new DefaultHttpClient();
+		// Prepare a request object
+
+		HttpGet httpget = new HttpGet(HTTP_REST_FRIKIADOS
+				+ "loginFrikiados?idFacebookUser="
+				+ idFacebook + "&nickname="
+				+ nickName + "&email="
+				+ email + "&birthday=" + userBirthday + "&sex=" + gender);
+		
+		HttpParams httpParameters = new BasicHttpParams();
+		// Set the timeout in milliseconds until a connection is established.
+		// The default value is zero, that means the timeout is not used. 	
+		HttpConnectionParams.setConnectionTimeout(httpParameters, TIME_OUT_CONNEXION);
+		// Set the default socket timeout (SO_TIMEOUT) 
+		// in milliseconds which is the timeout for waiting for data.
+		HttpConnectionParams.setSoTimeout(httpParameters, TIME_OUT_SOCKET);
+
+		DefaultHttpClient httpClient = new DefaultHttpClient(httpParameters);
+
+		try 
+		{
+			// Execute the request
+			HttpResponse response = httpClient.execute(httpget);
+			// Get the response entity
+			HttpEntity entity = response.getEntity();
+			JSONObject jsonObj = getJSONFromInputStream(entity.getContent());
+
+			String status = jsonObj.getString(TAG_STATUS);
+
+			if (status.equals(SessionManager.STATUS_ERROR)) 
+			{
+				String message = jsonObj.getString(TAG_MESSAGE);
+				/**if(message.equals("Invalid API Key."))
+				{
+					//sessionManagerLidinyu.closeSession();
+					//conexion=9;
+				}**/
+				
+				Log.e("getLoginFacebook: Error webService", message);
+			} 
+			else 
+			{
+				System.out.println("Login correcto");
+				JSONObject dataObj = jsonObj.getJSONObject(TAG_DATA);
+				Log.e("getLoginFacebook: data response", dataObj.toString());
+
+				// GUARDAMOS EN SESSION LOS DATOS
+				sessionManagerFrikiados.createLoginSessionWithFacebook(
+						idFacebook, userBirthday,
+						gender, email);
+			}
+		} 
+		catch (JSONException e) 
+		{
+			Log.e("getLogin:Error JSONException", e.getMessage());
+			conexion =2;
+		} 
+		catch (ClientProtocolException e) 
+		{
+			Log.e("getLogin:Error ClientProtocolException", e.getMessage());
+			conexion =2;
+		} 
+		catch (ConnectTimeoutException e)
+		{
+			Log.e("getLogin:Error ConnectTimeoutException", e.getMessage());
+			conexion =2;
+	    }
+		catch (IOException e)
+		{
+			Log.e("getLogin:Error IOException", e.getMessage());
+			conexion =2;
+		}
+		catch (Exception e)
+		{
+			Log.e("Error data null" , "No mensaje");
+			conexion=2;
+		}
+
+		// Informamos de como ha ido el login TRUE|FALSE
+		return conexion;
+	}
+	private static JSONObject getJSONFromInputStream(InputStream is) 
+	{
+		JSONObject jObj = null;
+		String json = null;
+		
+		try 
+		{
+			BufferedReader reader = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
+			StringBuilder sb = new StringBuilder();
+			String line = null;
+			while ((line = reader.readLine()) != null) 
+			{
+				sb.append(line + "\n");
+			}
+			
+			is.close();
+			json = sb.toString();
+			
+			jObj = new JSONObject(json);
+		} 
+		catch (JSONException e) 
+		{
+			Log.e("JSON getJSONFromInputStream", "JSONException " + e.toString());
+		}
+		catch (Exception e) 
+		{
+			Log.e("Error getJSONFromInputStream", "Exception " + e.toString());
+		}
+		
+		return jObj;
+	}
+
+}

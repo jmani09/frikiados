@@ -1,0 +1,291 @@
+package com.appyuken.frikiados.classes;
+
+import java.util.HashMap;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+
+public class SessionManager {
+	// Shared Preferences
+	SharedPreferences pref;
+
+	// Editor for Shared preferences
+	Editor editor;
+
+	// Context
+	Context _context;
+
+	// Shared pref mode
+	int PRIVATE_MODE = 0;
+
+	// Sharedpref file name
+	private static final String IS_BBDD_CREATED = "IsBBDDCreated";
+	private static final String PREF_NAME = "AndroidHivePref";
+	// All Shared Preferences Keys
+	private static final String IS_LOGINFACEBOOK = "IsLoggedInFacebook";
+
+	/******************************* LOGIN FRIKIADOS ***************************/
+	// User name (make variable public to access from outside)
+	public static final String KEY_NICKNAME = "nickname";
+	// Email address (make variable public to access from outside)
+	public static final String KEY_EMAIL = "email";
+	// User sex
+	public static final String KEY_GENDER = "gender";
+	// User name (make variable public to access from outside)
+	public static final String KEY_ID_USER_FRIKIADOS = "idUserFrikiados";
+	// User lifes game
+	public static final String KEY_NUMBER_LIFES = "numberOfLifes";
+	// User birthday
+	public static final String KEY_USER_BIRTHDAY = "birthday";
+	// User name (make variable public to access from outside)
+	public static final String TOKEN = "communicationKey";
+	// Key verify if token create
+	private static final String IS_TOKEN_CREATE = "IsTokenCreated";
+	// User best score
+	public static final String KEY_BEST_SCORE = "bestScore";
+	// User LastUpdate
+	public static final String KEY_LAST_UPDATE = "LastUpdate";
+	/***********************************************************************/
+	/***********************************************************************/
+
+	/******************************* FACEBOOK ********************************/
+	// id user in Facebook (make variable public to access from outside)
+	public static final String KEY_FB_USER_ID = "fbUserId";
+
+	public static final String STATUS_ERROR = "error";
+	public static final Object STATUS_OK = "ok";
+	/******************************* SOUND PREFERENCES ********************************/
+	public static final String IS_SOUND_EFFECTS_ENABLED = "activeSounds";
+	public static final String IS_MUSIC_ENABLED = "soundActive";
+
+	/***********************************************************************/
+	/***********************************************************************/
+
+	// Constructor
+	public SessionManager(Context context) {
+		this._context = context;
+		pref = _context.getSharedPreferences(PREF_NAME, PRIVATE_MODE); // Private_mode
+																		// means
+																		// that
+																		// only
+																		// the
+																		// application
+																		// creating
+																		// the
+																		// shared
+																		// preference
+																		// can
+																		// read/write
+																		// the
+																		// preference
+		editor = pref.edit();
+	}
+
+	/**
+	 * Get stored session data
+	 * */
+	public HashMap<String, String> getUserDetails() {
+		// HashMap pares de nombre propiedad, valor propiedad
+		HashMap<String, String> user = new HashMap<String, String>();
+
+		// user name
+		user.put(KEY_NICKNAME, pref.getString(KEY_NICKNAME, null));
+		// user email
+		user.put(KEY_EMAIL, pref.getString(KEY_EMAIL, null));
+		// id user frikiados
+		user.put(KEY_ID_USER_FRIKIADOS,
+				pref.getString(KEY_ID_USER_FRIKIADOS, null));
+		// number of lifes
+		user.put(KEY_NUMBER_LIFES, pref.getString(KEY_NUMBER_LIFES, "5"));
+		// user id on facebook
+		user.put(KEY_FB_USER_ID, pref.getString(KEY_FB_USER_ID, null));
+		// user gender
+		user.put(KEY_GENDER, pref.getString(KEY_GENDER, null));
+		// user birthday
+		user.put(KEY_USER_BIRTHDAY, pref.getString(KEY_USER_BIRTHDAY, null));
+		// user best socre
+		user.put(KEY_BEST_SCORE, pref.getString(KEY_BEST_SCORE, "0"));
+		// user token
+		user.put(TOKEN, pref.getString(TOKEN, null));
+		// user LastUpdate
+		user.put(KEY_LAST_UPDATE, pref.getString(KEY_LAST_UPDATE, "1"));
+
+		// return user
+		return user;
+	}
+
+	/**
+	 * Clear session facebook details
+	 * */
+	public void logoutUserFacebook() {
+		// Clearing all data from Shared Preferences
+		editor.putBoolean(IS_LOGINFACEBOOK, false);
+		editor.putString(KEY_EMAIL, "");
+		editor.putString(KEY_ID_USER_FRIKIADOS, "");
+		editor.putString(KEY_FB_USER_ID, "");
+		editor.putString(KEY_NICKNAME, "");
+		editor.putString(KEY_USER_BIRTHDAY, "");
+		editor.putString(KEY_GENDER, "");
+		editor.commit();
+	}
+
+	public boolean isCreateBBDD() {
+		return pref.getBoolean(IS_BBDD_CREATED, false);// Si está vacia la
+														// variable
+		// devuelve false por defecto
+	}
+
+	public boolean isSoundEfectsEnabled() {
+		return pref.getBoolean(IS_SOUND_EFFECTS_ENABLED, true);// Si está vacia
+																// la
+		// variable
+		// devuelve false por defecto
+	}
+	
+	public void setSoundEfectsEnable() {
+		// TODO Auto-generated method stub
+		editor.putBoolean(IS_SOUND_EFFECTS_ENABLED, true);
+		editor.commit();
+
+	}
+	public void setSoundEfectsDisable() {
+		// TODO Auto-generated method stub
+		editor.putBoolean(IS_SOUND_EFFECTS_ENABLED, false);
+		editor.commit();
+
+	}
+
+	public boolean isMusicEnabled() {
+		return pref.getBoolean(IS_MUSIC_ENABLED, true);// Si está vacia la
+														// variable
+		// devuelve false por defecto
+	}
+	public void setMusicEnable() {
+		// TODO Auto-generated method stub
+		editor.putBoolean(IS_MUSIC_ENABLED, true);
+		editor.commit();
+
+	}
+	public void setMusicDisable() {
+		// TODO Auto-generated method stub
+		editor.putBoolean(IS_MUSIC_ENABLED, false);
+		editor.commit();
+
+	}
+	
+
+	public boolean isLoggedInFacebook() {
+		return pref.getBoolean(IS_LOGINFACEBOOK, false);// Si está vacia la
+														// variable
+		// devuelve false por defecto
+	}
+
+	public String getNumberOfLifes() {
+		return pref.getString(KEY_NUMBER_LIFES, "");
+	}
+
+	public void createBBDD() {
+		// Storing create bbdd files value as TRUE
+		editor.putBoolean(IS_BBDD_CREATED, true);//
+		editor.commit();
+	}
+
+	/**
+	 * Create login session for Facebook Login
+	 * 
+	 * @param email
+	 * @param fbSex
+	 * */
+	public void createLoginSessionFrikiados(String fbId, String fbBirthday,
+			String fbGender, String email, String frikiadosId) {
+		// Storing login value as TRUE
+		editor.putBoolean(IS_LOGINFACEBOOK, true);
+
+		// Storing facebook user id in pref
+		editor.putString(KEY_FB_USER_ID, fbId);
+
+		// Storing facebook birthday name in pref
+		editor.putString(KEY_USER_BIRTHDAY, fbBirthday);
+		// Storing facebook email in pref
+		editor.putString(KEY_EMAIL, email);
+		// Storing facebook gender in pref
+		editor.putString(KEY_GENDER, fbGender);
+		// Storing id frikaidos in pref
+		editor.putString(KEY_ID_USER_FRIKIADOS, frikiadosId);
+
+		// commit changes
+		editor.commit();
+
+	}
+
+	public void updateProfileFrikiados(String userBirthday,
+			String userNickname, String userGender, String userEmail) {
+		// Storing new values for user profile
+
+		// Storing new birthday in pref
+		editor.putString(KEY_USER_BIRTHDAY, userBirthday);
+		// Storing new email in pref
+		editor.putString(KEY_EMAIL, userEmail);
+		// Storing new gender in pref
+		editor.putString(KEY_GENDER, userGender);
+		// Storing new nickname in pref
+		editor.putString(KEY_NICKNAME, userNickname);
+		// commit changes
+		editor.commit();
+	}
+
+	public boolean updateBestScore(int newScore) {
+		// Update bestScore only score is best than last
+		int lastScore = Integer.parseInt(pref.getString(KEY_BEST_SCORE, "0"));
+		if (newScore > lastScore) {
+			// update bestScore
+			System.out.println("puntuación mejor");
+			editor.putString(KEY_BEST_SCORE, Integer.toString(newScore));
+			// comit changes
+			editor.commit();
+			return true;
+		} else {
+			System.out.println("puntuación igual o peor");
+			return false;
+		}
+	}
+	public int getBestScore() {
+		return Integer.parseInt(pref.getString(KEY_BEST_SCORE, "0"));
+	}
+	
+
+	public void updateLifes(int newLifes) {
+		// TODO Auto-generated method stub
+		editor.putString(KEY_NUMBER_LIFES, String.valueOf(newLifes));
+		editor.commit();
+
+	}
+
+	public void saveToken(String token) {
+		// TODO Auto-generated method stub
+		editor.putString(TOKEN, token);
+		editor.putBoolean(IS_TOKEN_CREATE, true);
+		editor.commit();
+	}
+
+	public String getToken() {
+		return pref.getString(TOKEN, "2c71dc888bc98f836d871e85e37feff9");
+	}
+
+	public boolean isCreateToken() {
+		return pref.getBoolean(IS_TOKEN_CREATE, false);// Si está vacia la
+														// variable
+		// devuelve false por defecto
+	}
+
+	public void saveLastUpdate(String lastUpdate) {
+		// TODO Auto-generated method stub
+		editor.putString(KEY_LAST_UPDATE, lastUpdate);
+		editor.commit();
+	}
+
+	public String getLastUpdate() {
+		return pref.getString(KEY_LAST_UPDATE, "1");
+	}
+}

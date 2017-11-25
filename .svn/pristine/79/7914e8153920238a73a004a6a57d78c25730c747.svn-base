@@ -1,0 +1,27 @@
+package com.appyuken.frikiados.classes;
+
+import java.util.ArrayList;
+
+public class Levels {
+	private ArrayList<Level> levels;
+	
+	public Levels() {
+		super();
+		this.levels = new ArrayList<Level>();
+		// TODO Auto-generated constructor stub
+	}
+
+	public Levels(ArrayList<Level> levels) {
+		super();
+		this.levels = levels;
+	}
+
+	public ArrayList<Level> getLevels() {
+		return levels;
+	}
+
+	public void setLevels(ArrayList<Level> levels) {
+		this.levels = levels;
+	}
+
+}

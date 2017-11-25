@@ -1,0 +1,305 @@
+package com.appyuken.frikiados.classes;
+
+import java.util.HashMap;
+
+import com.appyuken.frikiados.MainActivity;
+
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.widget.Toast;
+
+public class SessionManager {
+	// Shared Preferences
+	SharedPreferences pref;
+
+	// Editor for Shared preferences
+	Editor editor;
+
+	// Context
+	Context _context;
+
+	// Shared pref mode
+	int PRIVATE_MODE = 0;
+
+	// Sharedpref file name
+	
+	private static final String IS_XML_FILES_CREATED = "IsXmlFilesCreated";
+	
+	
+	private static final String IS_BBDD_CREATED = "IsBBDDCreated";
+	
+	
+	private static final String PREF_NAME = "AndroidHivePref";
+
+	// All Shared Preferences Keys
+	private static final String IS_LOGIN = "IsLoggedIn";
+	
+	
+	
+	
+	private static final String IS_LOGINFACEBOOK = "IsLoggedIn";
+
+	/******************************* LOGIN FRIKIADOS ***************************/
+	// User name (make variable public to access from outside)
+	public static final String KEY_NAME = "name";
+
+	// Email address (make variable public to access from outside)
+	public static final String KEY_EMAIL = "email";
+
+	// User password (make variable public to access from outside)
+	public static final String KEY_PASSWORD = "password";
+
+	// User name (make variable public to access from outside)
+	public static final String KEY_COMMUNICATION_KEY = "communicationKey";
+
+	// User name (make variable public to access from outside)
+	public static final String KEY_ID_USER_FRIKIADOS = "idUserFrikiados";
+	
+	//User lifes game
+	public static final String KEY_NUMBER_LIFES = "numberOfLifes";
+	/***********************************************************************/
+	/***********************************************************************/
+
+	/******************************* FACEBOOK ********************************/
+	// First name user in Facebook (make variable public to access from outside)
+	public static final String KEY_FB_USER_FIRST_NAME = "fbUserFirstName";
+
+	// Last name user in Facebook (make variable public to access from outside)
+	public static final String KEY_FB_USER_LAST_NAME = "fbUserLastName";
+
+	// id user in Facebook (make variable public to access from outside)
+	public static final String KEY_FB_USER_ID = "fbUserId";
+
+	/***********************************************************************/
+	/***********************************************************************/
+
+	// Constructor
+	public SessionManager(Context context) {
+		this._context = context;
+		pref = _context.getSharedPreferences(PREF_NAME, PRIVATE_MODE); // Private_mode
+																		// means
+																		// that
+																		// only
+																		// the
+																		// application
+																		// creating
+																		// the
+																		// shared
+																		// preference
+																		// can
+																		// read/write
+																		// the
+																		// preference
+		editor = pref.edit();
+	}
+
+	/**
+	 * Create login session (Normal app login - without social networks)
+	 * */
+	public void createXMLFiles(){
+		// Storing create xmlf files value as TRUE
+				editor.putBoolean(IS_XML_FILES_CREATED, true);//
+				editor.commit();
+		
+	}
+	
+	public void createBBDD(){
+		// Storing create xmlf files value as TRUE
+				editor.putBoolean(IS_BBDD_CREATED, true);//
+				editor.commit();
+		
+	}
+	public void createLoginSession(String email, String password,
+			String communicationKey, String idUser) {
+		// Storing login value as TRUE
+		editor.putBoolean(IS_LOGIN, true);// Sesi�n iniciada!
+
+		// Storing email in pref
+		editor.putString(KEY_EMAIL, email);
+
+		// Storing name in pref
+		editor.putString(KEY_PASSWORD, password);
+
+		// Storing communicationKey in pref
+		editor.putString(KEY_COMMUNICATION_KEY, communicationKey);
+
+		// Storing id user lidinyu in pref
+		editor.putString(KEY_ID_USER_FRIKIADOS, idUser);
+
+		// commit changes
+		editor.commit();
+
+		// Redireccionamos a la pantalla principal
+		/*
+		 * Intent i = new Intent(_context, PrincipalActivity.class);
+		 * 
+		 * // Closing all the Activities
+		 * i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		 * 
+		 * // Add new Flag to start new Activity
+		 * i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		 * 
+		 * // Staring Login Activity _context.startActivity(i);
+		 */
+	}
+
+	/**
+	 * Create register session (Cuando el usuario se registra a trav�s del
+	 * formulario de registro, directamente le hacemos login al terminar el
+	 * registro)
+	 * */
+	public void createRegisterSession(String userName, String email,
+			String password, String communicationKey, String idUser) {
+		// Storing login value as TRUE
+		editor.putBoolean(IS_LOGIN, true);// Sesi�n iniciada!
+
+		// Storing userName in pref
+		editor.putString(KEY_NAME, userName);
+
+		// Storing email in pref
+		editor.putString(KEY_EMAIL, email);
+
+		// Storing name in pref
+		editor.putString(KEY_PASSWORD, password);
+
+		// Storing communicationKey in pref
+		editor.putString(KEY_COMMUNICATION_KEY, communicationKey);
+
+		// Storing id user lidinyu in pref
+		editor.putString(KEY_ID_USER_FRIKIADOS, idUser);
+
+		// commit changes
+		editor.commit();
+
+		// Redireccionamos a la pantalla principal
+		/*
+		 * Intent i = new Intent(_context, PrincipalActivity.class);
+		 * 
+		 * // Closing all the Activities
+		 * i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		 * 
+		 * // Add new Flag to start new Activity
+		 * i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		 * 
+		 * // Staring Login Activity _context.startActivity(i);
+		 */
+	}
+
+	/**
+	 * Check login method will check user login status If false it will redirect
+	 * user to login page Else won't do anything
+	 * */
+	/**
+	 * Get stored session data
+	 * */
+	public HashMap<String, String> getUserDetails() {
+		// HashMap pares de nombre propiedad, valor propiedad
+		HashMap<String, String> user = new HashMap<String, String>();
+
+		// user name
+		user.put(KEY_NAME, pref.getString(KEY_NAME, null));
+
+		// user email
+		user.put(KEY_EMAIL, pref.getString(KEY_EMAIL, null));
+
+		// user password
+		user.put(KEY_PASSWORD, pref.getString(KEY_PASSWORD, null));
+
+		// communicationKey
+		user.put(KEY_COMMUNICATION_KEY,
+				pref.getString(KEY_COMMUNICATION_KEY, null));
+
+		// id user frikiados
+		user.put(KEY_ID_USER_FRIKIADOS,
+				pref.getString(KEY_ID_USER_FRIKIADOS, null));
+		// number of lifes
+		user.put(KEY_NUMBER_LIFES,
+				pref.getString(KEY_NUMBER_LIFES, "5"));
+
+		// user id on facebook
+		user.put(KEY_FB_USER_ID, pref.getString(KEY_FB_USER_ID, null));
+
+		// user first name on facebook
+		user.put(KEY_FB_USER_FIRST_NAME,
+				pref.getString(KEY_FB_USER_FIRST_NAME, null));
+
+		// user last name on facebook
+		user.put(KEY_FB_USER_LAST_NAME,
+				pref.getString(KEY_FB_USER_LAST_NAME, null));
+
+		// return user
+		return user;
+	}
+
+	/**
+	 * Clear session details
+	 * */
+	public void logoutUserFacebook() {
+		// Clearing all data from Shared Preferences
+		editor.putBoolean(IS_LOGINFACEBOOK, false);
+		// editor.clear();
+		editor.commit();
+	}
+
+	/**
+	 * Quick check for login
+	 * **/
+	public boolean isCreateXMLFiles() {
+		return pref.getBoolean(IS_XML_FILES_CREATED, false);// Si está vacia la variable
+												// devuelve false por defecto
+	}
+	public boolean isCreateBBDD() {
+		return pref.getBoolean(IS_BBDD_CREATED, false);// Si está vacia la variable
+												// devuelve false por defecto
+	}
+	
+	
+	// Get Login State
+	public boolean isLoggedIn() {
+		return pref.getBoolean(IS_LOGIN, false);// Si está vacia la variable
+												// devuelve false por defecto
+	}
+
+	public boolean isLoggedInFacebook() {
+		return pref.getBoolean(IS_LOGINFACEBOOK, false);// Si está vacia la
+														// variable
+		// devuelve false por defecto
+	}
+	
+	public String getNumberOfLifes(){
+		return pref.getString(KEY_NUMBER_LIFES, "");
+	}
+
+	/**
+	 * Create login session for Facebook Login
+	 * */
+	public void createLoginSessionWithFacebook(String fbId, String fbFirstName,
+			String fbLastName) {
+		// Storing login value as TRUE
+		editor.putBoolean(IS_LOGINFACEBOOK, true);
+
+		// Storing facebook user id in pref
+		editor.putString(KEY_FB_USER_ID, fbId);
+
+		// Storing facebook user first name in pref
+		editor.putString(KEY_FB_USER_FIRST_NAME, fbFirstName);
+
+		// Storing facebook user last name in pref
+		editor.putString(KEY_FB_USER_LAST_NAME, fbLastName);
+
+		// commit changes
+		editor.commit();
+
+	}
+
+	public void updateLifes(int newLifes) {
+		// TODO Auto-generated method stub
+		editor.putString(KEY_NUMBER_LIFES, String.valueOf(newLifes));
+		editor.commit();
+		
+	}
+
+}

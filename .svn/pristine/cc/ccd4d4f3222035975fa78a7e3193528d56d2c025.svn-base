@@ -1,0 +1,65 @@
+package com.appyuken.frikiados.classes;
+
+public class Level {
+
+	private String name;
+	private int number;
+	private boolean unlocked;
+	private int stars;
+	private String data;
+	
+	public Level() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	
+	public Level(String name, int number, boolean unlocked, int stars,
+			String data) {
+		super();
+		this.name = name;
+		this.number = number;
+		this.unlocked = unlocked;
+		this.stars = stars;
+		this.data = data;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public int getNumber() {
+		return number;
+	}
+	
+	public void setNumber(int number) {
+		this.number = number;
+	}
+	
+	public boolean isUnlocked() {
+		return unlocked;
+	}
+	
+	public void setUnlocked(boolean unlocked) {
+		this.unlocked = unlocked;
+	}
+	
+	public int getStars() {
+		return stars;
+	}
+	
+	public void setStars(int stars) {
+		this.stars = stars;
+	}
+	
+	public String getData() {
+		return data;
+	}
+	
+	public void setData(String data) {
+		this.data = data;
+	}
+}

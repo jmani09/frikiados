@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SelectWorld" 
+    android:background="#80000000" >
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:background="@drawable/pastilla" >
+
+        <TextView
+            android:id="@+id/textSettings"
+            style="@style/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="40dp"
+            android:gravity="center"
+            android:text="@string/frikiadosSettings" />
+
+        <RelativeLayout
+            android:id="@+id/relativeAux"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textSettings"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp" >
+
+            <Button
+                android:id="@+id/btnSound"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/background_btn_sound"
+                android:paddingBottom="5dp" />
+
+            <Button
+                android:id="@+id/btnPlate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/btnSound"
+                android:background="@drawable/background_btn_plate"
+                android:paddingBottom="5dp" />
+
+            <Button
+                android:id="@+id/btnProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_toRightOf="@+id/btnPlate"
+                android:background="@drawable/background_btn_profile"
+                android:paddingBottom="5dp" />
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/butnClose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/cerrar"
+            android:contentDescription="@string/frikiadosImage" />
+    </RelativeLayout>
+
+</RelativeLayout>

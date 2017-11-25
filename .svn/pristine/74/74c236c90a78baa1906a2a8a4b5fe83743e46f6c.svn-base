@@ -1,0 +1,166 @@
+package com.appyuken.frikiados.menu;
+
+import java.util.List;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.appyuken.frikiados.R;
+import com.appyuken.frikiados.classes.ResultGetScore;
+import com.appyuken.frikiados.classes.Score;
+import com.appyuken.frikiados.service.RestfulWebService;
+
+public class RankingActivity extends Activity {
+	ResultGetScore resultGetSocres;
+	private ProgressDialog dialog = null;
+	private List<Score> listOfBestScores;
+	private AccountAdapter scoresAdapter;
+	private ListView listView;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_ranking);
+
+		listView = (ListView) findViewById(R.id.frkiadosRanking);
+		new RefreshScores().execute();
+	}
+
+	class AccountAdapter extends ArrayAdapter<Score> {
+
+		Context context;
+
+		AccountAdapter(Context context, int resource, List<Score> objects) {
+			super(context, resource, objects);
+			this.context = context;
+		}
+
+		@SuppressLint("ViewHolder")
+		public View getView(final int position, View convertView,
+				ViewGroup parent) {
+			View row = View.inflate(context, R.layout.user_ranking_frikiados,
+					null);
+
+			// Recorrremos la lista de lidins para crear las filas del ListView
+			if (position < listOfBestScores.size()) {
+				// Procedemos a recuperar y mostrar todos los datos
+				// pertenecientes al Lidin
+				final TextView frikiadosNickName = (TextView) row
+						.findViewById(R.id.frkiadosNickname);
+				final TextView frikiadosUserScore = (TextView) row
+						.findViewById(R.id.frikiadosPoints);
+
+				frikiadosNickName.setText(listOfBestScores.get(position)
+						.getUserNickname());
+				frikiadosUserScore.setText(listOfBestScores.get(position)
+						.getUserScore());
+
+			}
+			return (row);
+		}
+	}
+
+	public class RefreshScores extends AsyncTask<Void, String, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			dialog = new ProgressDialog(RankingActivity.this);
+			dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			dialog.setCancelable(false);
+			dialog.setMessage("Cargando Ranking! Por favor espere unos segundos...!");
+			dialog.show();
+
+		}
+
+		@Override
+		protected Void doInBackground(Void... unused) {
+			resultGetSocres = RestfulWebService
+					.getFrikiadosRanking(getApplicationContext());
+			// RestfulWebService.sendScore("4", "704489022", "200",
+			// getApplicationContext());
+			// RestfulWebService.updateUserProfile("4", "704489022",
+			// "jmaniviesa@gmail.com", "1985-09-07", "male", "supermani",
+			// getApplicationContext());
+			return (null);
+		}
+
+		@Override
+		protected void onPostExecute(Void unused) {
+
+			if (resultGetSocres != null) {
+				switch (resultGetSocres.getError()) {
+				case 0:
+					// NO HAY ERROR
+					try {
+						dialog.dismiss();
+						dialog = null;
+						printScores(resultGetSocres);
+						// goToTarget = false;
+					} catch (Exception e) {
+						// nothing
+					}
+					break;
+
+				case 1:
+					try {
+						dialog.dismiss();
+						dialog = null;
+						// goToTarget = false;
+					} catch (Exception e) {
+						// nothing
+					}
+					// ERROR WEBSERVICE
+					System.out.println("Error WebService");
+					break;
+
+				case 2:
+					// ERROREXCEPTION
+					try {
+						dialog.dismiss();
+						dialog = null;
+						// goToTarget = false;
+					} catch (Exception e) {
+						// nothing
+					}
+					System.out.println("Error Exception");
+
+					break;
+
+				default:
+					break;
+				}
+			}
+		}
+
+	}
+
+	private void printScores(ResultGetScore resultGetSocres) {
+		// TODO Auto-generated method stub
+
+		if (resultGetSocres != null) {
+			listOfBestScores = resultGetSocres.getScore();
+			scoresAdapter = new AccountAdapter(getBaseContext(),
+					R.layout.user_ranking_frikiados, listOfBestScores);
+			listView.setAdapter(scoresAdapter);
+			scoresAdapter.notifyDataSetChanged();
+		}
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.ranking, menu);
+		return true;
+	}
+
+}

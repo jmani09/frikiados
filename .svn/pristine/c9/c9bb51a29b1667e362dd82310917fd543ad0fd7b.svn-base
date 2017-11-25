@@ -1,0 +1,128 @@
+package com.appyuken.frikiados;
+
+import java.util.HashMap;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+
+import com.appyuken.frikiados.classes.SessionManager;
+import com.appyuken.frikiados.service.RestfulWebService;
+
+public class SplashActivity extends Activity {
+
+	private SessionManager sessionManager;
+	private ImageView logoFrikiados;
+	private Animation fadeInLoading;
+	public static ProgressBar progressBar;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_splash);
+
+		sessionManager = new SessionManager(getBaseContext());
+		logoFrikiados = (ImageView) findViewById(R.id.logoFrikiados);
+		fadeInLoading = AnimationUtils.loadAnimation(getBaseContext(),
+				R.anim.fade_in_loading);
+		progressBar = (ProgressBar) findViewById(R.id.progressbar);
+
+		logoFrikiados.setVisibility(View.VISIBLE);
+		logoFrikiados.startAnimation(fadeInLoading);
+
+		HashMap<String, String> hashmap = sessionManager.getUserDetails();
+		int numOfLifes = Integer.parseInt(hashmap
+				.get(SessionManager.KEY_NUMBER_LIFES));
+
+		Context context = getApplicationContext();
+		CharSequence text = "Number of life: " + numOfLifes;
+		int duration = Toast.LENGTH_SHORT;
+
+		Toast toast = Toast.makeText(context, text, duration);
+		toast.show();
+
+		if (!sessionManager.isCreateToken()) {
+			new DownloadToken().execute();
+		} else {
+			// simulatedLoading();
+			new DownloadQuestionsIfNeeded().execute();
+			System.out.println("Token creado");
+		}
+
+	}
+
+
+	private class DownloadToken extends AsyncTask<String, String, String> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+		}
+
+		@Override
+		protected String doInBackground(String... urls) {
+			RestfulWebService.getFirstToken(getApplicationContext());
+			return "ok";
+		}
+
+		protected void onProgressUpdate(String... progress) {
+			progressBar.setProgress(Integer.parseInt(progress[0]));
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+
+			new DownloadQuestionsIfNeeded().execute();
+		}
+	}
+
+	private class DownloadQuestionsIfNeeded extends
+			AsyncTask<String, Integer, String> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+		}
+
+		@Override
+		protected String doInBackground(String... urls) {
+			RestfulWebService
+					.getDownloadModifiedQuestionsIfNeeded(
+							getApplicationContext(),
+							sessionManager.getToken());
+			return "ok";
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+
+			Intent mainActivity = new Intent(getBaseContext(),
+					MainActivity.class);
+			startActivity(mainActivity);
+			SplashActivity.this.finish();
+		}
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.splash, menu);
+		return true;
+	}
+
+	public static void progressBarProgress(int progress) {
+		// TODO Auto-generated method stub
+		progressBar.setProgress(progress);
+		System.out.println("Entra en progress");
+	}
+
+}

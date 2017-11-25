@@ -1,0 +1,101 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    android:orientation="vertical"
+    tools:context=".MainActivity" >
+
+        <ImageView
+            android:id="@+id/logoFrikiados"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:layout_marginTop="25dp"
+            android:layout_weight="0.4"
+            android:background="@drawable/logo_frikiados_beta"
+            android:contentDescription="@+id/frikiadosImage"
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/btnOnePlayer"
+            style="@style/text"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:layout_marginTop="25dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/background_btn_main"
+            android:gravity="center"
+            android:text="@string/btnOnePlayerString"
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/btnCategoryMode"
+            style="@style/text"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/background_btn_main"
+            android:text="@string/btnCategoryMode"
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/btnVsAdvanced"
+            style="@style/text"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/background_btn_main"
+            android:text="@string/enviarPregunta"
+            android:visibility="invisible" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="0.16"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/btnShare"
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                android:background="@drawable/btn_compartir"
+                android:visibility="invisible" />
+
+            <Button
+                android:id="@+id/btnSettings"
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/btn_setting"
+                android:visibility="invisible" />
+
+            <Button
+                android:id="@+id/btnPerfil"
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/btn_perfil"
+                android:visibility="invisible" />
+
+            <Button
+                android:id="@+id/btnRanking"
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/btn_ranking"
+                android:visibility="invisible" />
+        </LinearLayout>
+</LinearLayout>

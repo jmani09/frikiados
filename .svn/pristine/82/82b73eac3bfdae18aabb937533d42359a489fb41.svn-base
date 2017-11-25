@@ -1,0 +1,175 @@
+package com.appyuken.frikiados.service;
+
+public class RestfulWeb {
+
+	/**
+	 * Constante con la información del Servidor.
+	 */
+	protected final static String HTTP_REST_FRIKIADOS = "http://hectorgalbis.16mb.com/frikiados/api/";
+	
+	/**
+	 * Tag inicial de todas las llamadas, para saber si la llamada ha sido correcta.
+	 */
+	protected static final String TAG_STATUS = "status";
+	
+	/**
+	 * Tag data, contiene una array con los datos en formato json.
+	 */
+	protected static final String TAG_DATA = "profile";
+	
+	/**
+	 * Tag id de usuario
+	 */
+	protected static final String TAG_ID_USER = "id";
+	
+	/**
+	 * Tag xAPIKey usuario
+	 */
+	protected static final String TAG_X_API_KEY = "X-API-KEY";
+
+	/**
+	 * Tag con la información de la localización del usuario
+	 */
+	protected static final String TAG_LOCATION = "location";
+	
+	/**
+	 * Tag con la información del teléfono
+	 */
+	//protected static final String TAG_PHONE_CONTACT = "phoneContact";
+	
+	/**
+	 * Tag con la información de la edad del usuario
+	 */
+	protected static final String TAG_AGE = "age";
+	
+	/**
+	 * Tag con la información del sexo del usuario
+	 */
+	protected static final String TAG_SEX = "sex";
+	
+	/**
+	 * Tag con la información del email del usuario
+	 */
+	protected static final String TAG_EMAIL = "email";
+	
+	/**
+	 * Tag con la información del lidinrank del usuario
+	 */
+	protected static final String TAG_LIDINRANK = "lidinRank";
+	
+	/**
+	 * Tag con la información de los lidins enviados de un usuario
+	 */
+	protected static final String TAG_LIDINSENT = "lidinsSent";
+	
+	/**
+	 * Tag con la información del user name.
+	 */
+	protected static final String TAG_USERNAME = "userName";
+	
+	
+	/**
+	 * Tag id del lidin
+	 */
+	protected static final String TAG_ID_LIDIN = "id";
+	
+	/**
+	 * Tag tipo de lidin
+	 */
+	protected static final String TAG_TYPE = "type";
+	
+	/**
+	 * Tag tipo de Contenido del Lidin
+	 */
+	protected static final String TAG_CONTENTYPE = "contentType";
+	
+	/**
+	 * Tag tipo de Contenido del Lidin
+	 */
+	protected static final String TAG_ISOCOUNTRY = "isoCountry";
+	
+	
+	/**
+	 * Tag contenido del lidin
+	 */
+	protected static final String TAG_CONTENT = "content";
+	
+	/**
+	 * Tag descripción del lidin
+	 */
+	protected static final String TAG_DESCRIPTION = "description";
+
+	/**
+	 * Tag título del lidin
+	 */
+	protected static final String TAG_TITLE = "title";
+	
+	/**
+	 * Tag que informa el propietario del lidin
+	 */
+	protected static final String TAG_OWNER = "owner";
+	
+	/**
+	 * Tag que informa de la latitud del lidin
+	 */
+	protected static final String TAG_LATITUDE = "latitude";
+	
+	/**
+	 * Tag que informa de la longitud del lidin
+	 */
+	protected static final String TAG_LONGITUDE = "longitude";
+	
+	/**
+	 * Tag que informa de la altitud del lidin
+	 */
+	protected static final String TAG_ALTITUDE = "altitude";
+	
+	/**
+	 * Tag que informa de la caducidad del lidin
+	 */
+	protected static final String TAG_CADUCIDAD = "dateCaducity";
+	
+	/**
+	 * Tag que informa de la fecha de creación del lidin
+	 */
+	protected static final String TAG_FECHA_CREACION = "dateCreated";
+
+	/**
+	 * Tag que informa del ID Facebook
+	 */
+	protected static final String TAG_ID_FACEBOOK = "idFacebook";
+	
+	/**
+	 * Tag que informa del ID Google
+	 */
+	protected static final String TAG_ID_GOOGLE = "idGoogle";
+	
+	/**
+	 * Tag que informa del ID Twitter
+	 */
+	protected static final String TAG_ID_TWITTER = "idTwitter";
+	
+	/**
+	 * Tag que informa del mensage de respuesta del servidor
+	 */
+	protected static final String TAG_MESSAGE = "message";
+	
+	protected static final String TAG_USER_LIDINYU = "lidinyuUser";
+	
+	protected static final String TAG_ID_FRIEND = "idUserFriend";
+	
+	protected static final String TAG_NAME_FRIEND = "userName";
+	
+	protected static final String TAG_CAN_SET_LIKE = "canSetLike";
+	
+	/**
+	 * Tag LidinRank Creador
+	 */
+	protected static final String TAG_RANK = "lidinRankOwner";
+	
+	/**
+	 * Tag obtener likes
+	 */
+	protected static final String GET_LIKE = "numOfLikes";
+	protected static final String TAG_LIKES = "likes";
+}

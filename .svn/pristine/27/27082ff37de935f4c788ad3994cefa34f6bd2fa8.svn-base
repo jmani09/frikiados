@@ -1,0 +1,88 @@
+package com.appyuken.frikiados.classes;
+
+import java.util.HashMap;
+
+import com.appyuken.frikiados.R;
+
+import android.content.Context;
+import android.media.AudioManager;
+import android.media.SoundPool;
+
+public class SoundPoolClass {
+	private SoundPool soundPoolFail;
+	private HashMap<Integer, Integer> soundPoolMap;
+	private int soundIDFail = 1;
+	private SoundPool soundPoolCorrect;
+	private int soundIDCorrect = 1;
+	private AudioManager audioManager;
+	private int soundIDSelection = 1;
+	private SoundPool soundPoolSelection;
+	private int soundIDIntroBoss = 1;
+	private SoundPool soundPoolIntroBoss;
+	private float curVolume;
+	private float maxVolume;
+	private float leftVolume;
+	private float rightVolume;
+	private int priority;
+	private int no_loop;
+	private float normal_playback_rate;
+	private SessionManager sessionManager;
+	// Context
+	private Context _context;
+	// Constructor
+	public SoundPoolClass(Context context) {
+		
+		this._context = context;
+		sessionManager = new SessionManager(_context);
+		System.out.println("Clase sound pool creada");
+		audioManager = (AudioManager) _context.getSystemService(Context.AUDIO_SERVICE);
+		soundPoolFail = new SoundPool(4, AudioManager.STREAM_MUSIC, 100);
+		soundPoolCorrect = new SoundPool(4, AudioManager.STREAM_MUSIC, 100);
+		soundPoolSelection = new SoundPool(4, AudioManager.STREAM_MUSIC, 100);
+		soundPoolIntroBoss = new SoundPool(4, AudioManager.STREAM_MUSIC, 100);
+		soundPoolFail.load(_context, R.raw.fail, 1);
+		soundPoolCorrect.load(_context, R.raw.ok2, 1);	
+		soundPoolSelection.load(_context, R.raw.select_pop, 1);	
+		soundPoolIntroBoss.load(_context, R.raw.intro_boss, 1);	
+		
+	/*	curVolume = audioManager
+				.getStreamVolume(AudioManager.STREAM_MUSIC);
+		maxVolume = audioManager
+				.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+		leftVolume = curVolume / maxVolume;
+		rightVolume = curVolume / maxVolume;*/
+		leftVolume = 1;
+		rightVolume = 1;
+		priority = 1;
+		no_loop = 0;
+		normal_playback_rate = 1f;
+	}
+	public void playCorrectSound() {	
+		if (sessionManager.isSoundEfectsEnabled()) {
+		System.out.println("play correct sound");
+		soundPoolCorrect.play(soundIDCorrect, leftVolume, rightVolume, priority, no_loop,
+				normal_playback_rate);
+		}
+	}
+	public void playIncorrectSound() {
+		if (sessionManager.isSoundEfectsEnabled()) {
+		System.out.println("play incorrect sound");
+		soundPoolFail.play(soundIDFail, leftVolume, rightVolume, priority, no_loop,
+				normal_playback_rate);
+		}
+	}
+	public void playSelectionSound() {
+		if (sessionManager.isSoundEfectsEnabled()) {
+		System.out.println("play selection sound");
+		soundPoolSelection.play(soundIDSelection, leftVolume, rightVolume, priority, no_loop,
+				normal_playback_rate);
+		}
+	}
+	public void playInroBossSound() {
+		if (sessionManager.isSoundEfectsEnabled()) {
+		System.out.println("play selection sound");
+		soundPoolIntroBoss.play(soundIDIntroBoss, leftVolume, rightVolume, priority, no_loop,
+				normal_playback_rate);
+		}
+	}
+}

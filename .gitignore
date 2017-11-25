@@ -1,0 +1,9 @@
+# Ignorar todos los subdirectorios del bin i del gen
+bin/
+gen/
+
+# Ignorar archivos de proyecto
+.project
+.settings/*
+.DS_Store
+.classpath

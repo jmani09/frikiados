@@ -1,0 +1,33 @@
+package com.appyuken.frikiados.menu;
+
+import com.appyuken.frikiados.*;
+import com.google.android.gms.analytics.GoogleAnalytics;
+
+import android.os.Bundle;
+import android.app.Activity;
+import android.view.Menu;
+
+public class CreditsActivity extends Activity {
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_shop);
+		((Frikiados) getApplication())
+				.getTracker(Frikiados.TrackerName.APP_TRACKER);
+		// Set screen name.
+		GoogleAnalytics.getInstance(this).reportActivityStart(this);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.shop, menu);
+		return true;
+	}
+
+	public void onStop() {
+		GoogleAnalytics.getInstance(this).reportActivityStop(this);
+		super.onStop();
+	}
+}

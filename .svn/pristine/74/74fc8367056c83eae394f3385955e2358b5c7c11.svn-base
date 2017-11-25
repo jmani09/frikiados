@@ -1,0 +1,173 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    android:orientation="vertical"
+    tools:context=".UserProfile" >
+
+    <LinearLayout
+        android:id="@+id/linearLifes"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.1"
+        android:gravity="right"
+        android:orientation="horizontal" >
+
+        <ImageView
+            android:id="@+id/imageLifes"
+            android:layout_width="41dp"
+            android:layout_height="42dp"
+            android:background="@drawable/corazon_rojo"
+            android:contentDescription="@+id/frikiadosImage"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/numOfLifes"
+            style="@style/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="10dp"
+            android:text="@string/frikiadosLifes"
+            android:visibility="visible" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearUserProfile"
+        android:layout_width="match_parent"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_height="0dp"
+        android:layout_weight="0.6"
+        android:orientation="vertical" >
+
+        <ImageView
+            android:id="@+id/frikiadosImageProfile"
+            android:layout_width="50dp"
+            android:layout_height="93dp"
+            android:layout_gravity="left"
+            android:contentDescription="@string/frikiadosImage"
+            android:src="@drawable/batman_mascara" />
+
+        <LinearLayout
+            android:id="@+id/linearNickName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/textNickName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/frikiadosNickName"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <EditText
+                android:id="@+id/editNickName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textPersonName" >
+
+                <requestFocus />
+            </EditText>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearEmail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/textEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/frikiadosEmail"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+            <EditText
+                android:id="@+id/editEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:ems="10"
+                android:inputType="textEmailAddress" >
+
+                <requestFocus />
+            </EditText>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearBirthday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/textBirthday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/frikiadosBirthday"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+            <EditText
+                android:id="@+id/editBirthday"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="date" >
+
+                <requestFocus />
+            </EditText>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearSex"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/textSex"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/frikiadosSex"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+            <EditText
+                android:id="@+id/editSex"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textPersonName" >
+
+                <requestFocus />
+            </EditText>
+        </LinearLayout>
+    </LinearLayout>
+
+    <com.facebook.widget.LoginButton
+        android:id="@+id/login_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+
+    <LinearLayout
+        android:id="@+id/linearBestScore"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.3"
+        android:gravity="right"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/textBestScore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/frikiadosBestScore"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+    </LinearLayout>
+
+</LinearLayout>

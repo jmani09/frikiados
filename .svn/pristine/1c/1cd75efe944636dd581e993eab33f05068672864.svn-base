@@ -1,0 +1,908 @@
+package com.appyuken.frikiados.gameModes;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import android.annotation.TargetApi;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
+import android.graphics.Typeface;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Handler;
+import android.util.Log;
+import android.util.TypedValue;
+import android.view.Menu;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationUtils;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.appyuken.frikiados.MainActivity;
+import com.appyuken.frikiados.R;
+import com.appyuken.frikiados.classes.Question;
+import com.appyuken.frikiados.classes.SessionManager;
+import com.appyuken.frikiados.service.RestfulWebService;
+import com.appyuken.gameEngine.FrikiEngine;
+import com.appyuken.model.ResumeLevel;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
+
+public class OnePlayerActivity extends Activity {
+
+	private Button firstAnswer;
+	private Button secondAnswer;
+	private Button thirdAnswer;
+	private Button textTimer;
+	private TextView textQuestion;
+	private TextView textNumQuestion;
+
+	private Animation animMove;
+	private Animation animMove2;
+	private Animation animMove3;
+	private Animation animBounce;
+	private Animation animZoomIn;
+	private FrikiEngine frikiEngine;
+	private int correctAnswer;
+	private int numberOfQuestion = 0;
+	private double timeFrikiChrono;
+	private final long interval = 1 * 1000;
+	private CountDownTimer FrikiChrono;
+	private long startTime;
+	private boolean FrikiChronoIsStart = false;
+	private Question question;
+	private ArrayList<ResumeLevel> resumeLevel;
+	private AdView adView;
+	private static final String MY_AD_UNIT_ID = "ca-app-pub-9585973118353015/2939825487";
+	private int frikiadosScore;
+	private int bossDefeated;
+	private boolean levelBoss = false;
+	private int frikiadosScoreBoss;
+	private int frikiadosTotalScore;
+	private Button btnClose;
+	private Typeface font;
+	private Typeface font2;
+	private Typeface font3;
+	private double timeToAnswer;
+	private int numberOfBoss;
+	private SessionManager sessionManager;
+	private int result;
+	private ProgressDialog dialog = null;
+	private boolean finalBoss = false;
+	private static final String AD_UNIT_ID = "ca-app-pub-9585973118353015/9578664681";
+	private InterstitialAd interstitial;
+	private TextView userScore;
+	private ImageView categoryAnswer;
+
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+	}
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_one_player);
+
+		firstAnswer = (Button) findViewById(R.id.firstAnswer);
+		secondAnswer = (Button) findViewById(R.id.secondAnswer);
+		thirdAnswer = (Button) findViewById(R.id.thirdAnswer);
+		textQuestion = (TextView) findViewById(R.id.textQuestion);
+		textNumQuestion = (TextView) findViewById(R.id.numQuestion);
+		textTimer = (Button) findViewById(R.id.textTimer);
+		userScore = (TextView) findViewById(R.id.userScore);
+		categoryAnswer = (ImageView) findViewById(R.id.categoryAnswer);
+
+		sessionManager = new SessionManager(getBaseContext());
+
+		font = Typeface.createFromAsset(getAssets(), "fonts/MYRIADPROBOLD.ttf");
+		textQuestion.setTypeface(font);
+		font2 = Typeface.createFromAsset(getAssets(),
+				"fonts/MYRIADPROSEMIBOLD.ttf");
+		font3 = Typeface.createFromAsset(getAssets(), "fonts/Minecraftia.ttf");
+		firstAnswer.setTypeface(font2);
+		secondAnswer.setTypeface(font2);
+		thirdAnswer.setTypeface(font2);
+		textTimer.setTypeface(font3);
+		textTimer.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources()
+				.getDimension(R.dimen.radar_text));
+
+		// Crear adView.
+		adView = new AdView(this);
+		adView.setAdUnitId(MY_AD_UNIT_ID);
+		adView.setAdSize(AdSize.SMART_BANNER);
+		interstitial = new InterstitialAd(this);
+		interstitial.setAdUnitId(AD_UNIT_ID);
+
+		LinearLayout layout = (LinearLayout) findViewById(R.id.frikiadosBanner);
+
+		// Añadirle adView.
+		layout.addView(adView);
+
+		// Iniciar una solicitud genérica.
+		AdRequest adRequest = new AdRequest.Builder().build();
+
+		// Cargar adView con la solicitud de anuncio.
+		adView.loadAd(adRequest);
+		interstitial.loadAd(adRequest);
+
+		animMove = AnimationUtils.loadAnimation(getApplicationContext(),
+				R.anim.move);
+		animMove2 = AnimationUtils.loadAnimation(getApplicationContext(),
+				R.anim.move);
+		animMove3 = AnimationUtils.loadAnimation(getApplicationContext(),
+				R.anim.move);
+		animBounce = AnimationUtils.loadAnimation(getApplicationContext(),
+				R.anim.bounce);
+		animZoomIn = AnimationUtils.loadAnimation(getApplicationContext(),
+				R.anim.zoom_in);
+
+		frikiEngine = new FrikiEngine(getBaseContext());
+		resumeLevel = new ArrayList<ResumeLevel>();
+
+		firstAnswer.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				thirdAnswer.setClickable(false);
+				secondAnswer.setClickable(false);
+				firstAnswer.setClickable(false);
+				// TODO Auto-generated method stub
+				if (correctAnswer == 1) {
+					tickCorrectAnswer("firstAnswer");
+				} else {
+					tickIncorrectAnswer("firstAnswer");
+				}
+			}
+		});
+
+		secondAnswer.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				thirdAnswer.setClickable(false);
+				secondAnswer.setClickable(false);
+				firstAnswer.setClickable(false);
+				if (correctAnswer == 2) {
+					tickCorrectAnswer("secondAnswer");
+				} else {
+					tickIncorrectAnswer("secondAnswer");
+				}
+			}
+		});
+		thirdAnswer.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				thirdAnswer.setClickable(false);
+				secondAnswer.setClickable(false);
+				firstAnswer.setClickable(false);
+				// TODO Auto-generated method stub
+				if (correctAnswer == 3) {
+					tickCorrectAnswer("thirdAnswer");
+				} else {
+					tickIncorrectAnswer("thirdAnswer");
+				}
+			}
+		});
+
+		startGame();
+
+	}
+
+	protected void tickIncorrectAnswer(String button) {
+		// TODO Auto-generated method stub
+
+		if (button.equals("firstAnswer")) {
+			firstAnswer
+					.setBackgroundResource(R.drawable.background_button_answer_incorrect);
+		} else if (button.equals("secondAnswer")) {
+			secondAnswer
+					.setBackgroundResource(R.drawable.background_button_answer_incorrect);
+		} else if (button.equals("thirdAnswer")) {
+			thirdAnswer
+					.setBackgroundResource(R.drawable.background_button_answer_incorrect);
+		}
+		saveIncorrectAnswerQuestion(question);
+		gameFinish(true);
+
+	}
+
+	protected void tickCorrectAnswer(String button) {
+		// TODO Auto-generated method stub
+		if (button.equals("firstAnswer")) {
+			firstAnswer
+					.setBackgroundResource(R.drawable.background_button_answer_correct);
+		} else if (button.equals("secondAnswer")) {
+			secondAnswer
+					.setBackgroundResource(R.drawable.background_button_answer_correct);
+		} else if (button.equals("thirdAnswer")) {
+			thirdAnswer
+					.setBackgroundResource(R.drawable.background_button_answer_correct);
+		}
+		saveCorrectAnswerQuestion(question);
+		System.out.println("Tiempo de respuesta: " + timeToAnswer);
+		calculateScoreQuestion(question, timeToAnswer);
+		final Handler handler = new Handler();
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				// Do something after 100ms
+				if (finalBoss) {
+					loadNextQuestion(true);
+				} else {
+					loadNextQuestion(false);
+				}
+			}
+		}, 1000);
+
+	}
+
+	private void startGame() {
+		// TODO Auto-generated method stub
+		loadNextQuestion(false);
+
+	}
+
+	protected void loadNextQuestion(boolean finalBossQuestion) {
+		// TODO Auto-generated method stub
+		if (!finalBossQuestion) {
+			if (!frikiEngine.isUserWithoutLives(getApplicationContext())) {
+				if (FrikiChronoIsStart) {
+					FrikiChrono.cancel();
+					FrikiChrono = null;
+				}
+				if (frikiEngine.questionOrBoss(numberOfQuestion) == 0) {
+					numberOfQuestion++;
+					hideQuestion();
+					textNumQuestion.setText("Pregunta " + numberOfQuestion);
+					startQuestionAnimations();
+					startNumQuestionAnimation();
+					loadQuestionToShow();
+				} else {
+					loadBossLevel(frikiEngine.questionOrBoss(numberOfQuestion));
+				}
+
+			} else {
+				returnToMain();
+			}
+		} else {
+			gameFinish(false);
+		}
+
+	}
+
+	private void loadQuestionToShow() {
+		question = new Question();
+		question = frikiEngine.getQuestion(getApplicationContext());
+		if (question.getGenre().equals("Cómic")) {
+			categoryAnswer
+					.setBackgroundResource(R.drawable.icono_categoria_comic);
+		} else if (question.getGenre().equals("Manga")) {
+			categoryAnswer
+					.setBackgroundResource(R.drawable.icono_categoria_manga);
+		} else if (question.getGenre().equals("Videojuegos")) {
+			categoryAnswer
+					.setBackgroundResource(R.drawable.icono_categoria_juego);
+		} else if (question.getGenre().equals("Series")) {
+			categoryAnswer
+					.setBackgroundResource(R.drawable.icono_categoria_serie);
+		} else if (question.getGenre().equals("Películas")) {
+			categoryAnswer
+					.setBackgroundResource(R.drawable.icono_categoria_peliculas);
+		}
+		textQuestion.setText(question.getQuestionText());
+		firstAnswer.setText(question.getAnswer1());
+		firstAnswer.setBackgroundResource(R.drawable.background_button_answer);
+		secondAnswer.setText(question.getAnswer2());
+		secondAnswer.setBackgroundResource(R.drawable.background_button_answer);
+		thirdAnswer.setText(question.getAnswer3());
+		thirdAnswer.setBackgroundResource(R.drawable.background_button_answer);
+		correctAnswer = question.getCorrectAnswer();
+	}
+
+	private void loadQuestionBossToShow(int i) {
+		question = new Question();
+		question = frikiEngine.getQuestionBoss(getApplicationContext(), i);
+		if (question.getGenre().equals("Cómic")) {
+			categoryAnswer
+					.setBackgroundResource(R.drawable.icono_categoria_comic);
+		} else if (question.getGenre().equals("Manga")) {
+			categoryAnswer
+					.setBackgroundResource(R.drawable.icono_categoria_manga);
+		} else if (question.getGenre().equals("Videojuegos")) {
+			categoryAnswer
+					.setBackgroundResource(R.drawable.icono_categoria_juego);
+		} else if (question.getGenre().equals("Series")) {
+			categoryAnswer
+					.setBackgroundResource(R.drawable.icono_categoria_serie);
+		} else if (question.getGenre().equals("Películas")) {
+			categoryAnswer
+					.setBackgroundResource(R.drawable.icono_categoria_peliculas);
+		}
+		textQuestion.setText(question.getQuestionText());
+		firstAnswer.setText(question.getAnswer1());
+		firstAnswer.setBackgroundResource(R.drawable.background_button_answer);
+		secondAnswer.setText(question.getAnswer2());
+		secondAnswer.setBackgroundResource(R.drawable.background_button_answer);
+		thirdAnswer.setText(question.getAnswer3());
+		thirdAnswer.setBackgroundResource(R.drawable.background_button_answer);
+		correctAnswer = question.getCorrectAnswer();
+	}
+
+	private void returnToMain() {
+		// TODO Auto-generated method stub
+		Context context = getApplicationContext();
+		CharSequence text = "No tienes vidas para seguir jugando, espera o pídeles a tus amigos por Facebook";
+		int duration = Toast.LENGTH_SHORT;
+
+		Toast toast = Toast.makeText(context, text, duration);
+		toast.show();
+		final Handler handler = new Handler();
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				// Do something after 100ms
+				Intent activityMain = new Intent(getBaseContext(),
+						MainActivity.class);
+				startActivity(activityMain);
+			}
+		}, 700);
+	}
+
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+	private void loadBossLevel(final int i) {
+		// TODO Auto-generated method stub
+		levelBoss = true;
+		final Dialog dialog = new Dialog(OnePlayerActivity.this,
+				android.R.style.Theme_Translucent_NoTitleBar);
+		switch (i) {
+		case 1:
+			dialog.setContentView(R.layout.custom_boss_comic);
+			dialog.getWindow().getAttributes().windowAnimations = R.style.PauseDialogAnimation;
+			dialog.setCancelable(false);
+			final ImageView imgLogo = (ImageView) dialog
+					.findViewById(R.id.logoJefe);
+			final ImageView imgJefeComic = (ImageView) dialog
+					.findViewById(R.id.imgJefe);
+			final ImageView imgHumoOne = (ImageView) dialog
+					.findViewById(R.id.imgHumoOne);
+			final ImageView imgHumoTwo = (ImageView) dialog
+					.findViewById(R.id.imgHumoTwo);
+			final ImageView imgRayo = (ImageView) dialog
+					.findViewById(R.id.imgRayo);
+			TextView txt2 = (TextView) dialog.findViewById(R.id.textJefeComic);
+			txt2.setTypeface(font);
+			textNumQuestion.setText("Boss Comic");
+
+			final Handler handler = new Handler();
+			handler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					// Do something after 100ms
+					imgJefeComic.setVisibility(View.VISIBLE);
+					imgJefeComic.startAnimation(animZoomIn);
+					imgHumoOne.setVisibility(View.VISIBLE);
+					imgHumoOne.startAnimation(animZoomIn);
+					imgHumoTwo.setVisibility(View.VISIBLE);
+					imgHumoTwo.startAnimation(animZoomIn);
+					imgLogo.setVisibility(View.VISIBLE);
+					imgLogo.startAnimation(animZoomIn);
+					imgRayo.setVisibility(View.VISIBLE);
+					imgRayo.startAnimation(animZoomIn);
+				}
+			}, 700);
+
+			break;
+		case 2:
+			dialog.setContentView(R.layout.custom_boss_manga);
+			dialog.getWindow().getAttributes().windowAnimations = R.style.PauseDialogAnimation;
+			dialog.setCancelable(false);
+			btnClose = (Button) dialog.findViewById(R.id.butnClose);
+			TextView txt3 = (TextView) dialog.findViewById(R.id.textJefeComic);
+			txt3.setTypeface(font);
+			textNumQuestion.setText("Boss Manga");
+
+			break;
+		case 3:
+			dialog.setContentView(R.layout.custom_boss_movies);
+			dialog.getWindow().getAttributes().windowAnimations = R.style.PauseDialogAnimation;
+			dialog.setCancelable(false);
+			TextView txt4 = (TextView) dialog.findViewById(R.id.textJefeComic);
+			txt4.setTypeface(font);
+			textNumQuestion.setText("Boss Movies");
+
+			break;
+		case 4:
+			dialog.setContentView(R.layout.custom_boss_series);
+			dialog.getWindow().getAttributes().windowAnimations = R.style.PauseDialogAnimation;
+			dialog.setCancelable(false);
+			TextView txt5 = (TextView) dialog.findViewById(R.id.textJefeComic);
+			txt5.setTypeface(font);
+			textNumQuestion.setText("Boss Series");
+
+			break;
+		case 5:
+			dialog.setContentView(R.layout.custom_boss_videogames);
+			dialog.getWindow().getAttributes().windowAnimations = R.style.PauseDialogAnimation;
+			dialog.setCancelable(false);
+			TextView txt6 = (TextView) dialog.findViewById(R.id.textJefeComic);
+			Typeface font = Typeface.createFromAsset(getAssets(),
+					"fonts/MYRIADPROBOLD.ttf");
+			txt6.setTypeface(font);
+			textNumQuestion.setText("Boss VideoGames");
+			finalBoss = true;
+
+			break;
+		}
+
+		btnClose = (Button) dialog.findViewById(R.id.butnClose);
+		btnClose.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				numberOfQuestion++;
+				hideQuestion();
+				// textNumQuestion.setText("Pregunta " + numberOfQuestion);
+				startQuestionAnimations();
+				startNumQuestionAnimation();
+				loadQuestionBossToShow(i);
+				dialog.dismiss();
+			}
+		});
+		dialog.show();
+		/*startQuestionAnimations();
+		startNumQuestionAnimation();
+		loadQuestionBossToShow(i);*/
+	}
+
+	private void gameFinish(boolean b) {
+		// TODO Auto-generated method stub
+		frikiadosTotalScore = frikiadosScore + frikiadosScoreBoss;
+		sendScoreToServer(frikiEngine.userGameOver(getApplicationContext(),
+				resumeLevel, frikiadosTotalScore, numberOfQuestion, b),
+				numberOfQuestion);
+		FrikiChrono.cancel();
+
+		if (!isFinishing()) {
+
+			final Dialog dialog = new Dialog(OnePlayerActivity.this,
+					android.R.style.Theme_Translucent_NoTitleBar);
+			dialog.setContentView(R.layout.custom_dialog_finishgame);
+			dialog.getWindow().getAttributes().windowAnimations = R.style.PauseDialogAnimation;
+			dialog.setCancelable(false);
+			final LinearLayout linearOpacity = (LinearLayout) dialog
+					.findViewById(R.id.linearOpacity);
+
+			Button btnMenu = (Button) dialog.findViewById(R.id.btnMenu);
+			Button btnTryAgain = (Button) dialog.findViewById(R.id.btnTryAgain);
+			TextView txtScore = (TextView) dialog.findViewById(R.id.textScorePointsAnswers);
+			TextView txtBestScore = (TextView) dialog
+					.findViewById(R.id.textBestScorePointsAnswers);
+			TextView txtScoreTitle = (TextView) dialog.findViewById(R.id.textScore);
+			TextView txtBestScoreTitle = (TextView) dialog
+					.findViewById(R.id.textBestScore);
+			
+			txtScore.setTypeface(font);
+			txtBestScore.setTypeface(font);		
+			txtScoreTitle.setTypeface(font);
+			txtBestScoreTitle.setTypeface(font);
+
+			txtScore.setText(frikiadosTotalScore + 
+					"pts / " + numberOfQuestion + "?");
+			txtBestScore.setText(sessionManager.getBestScore() + 
+					"pts / " + sessionManager.getAnsweredQuestions() + "?");
+
+			dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+
+				@Override
+				public void onShow(DialogInterface dialog) {
+					final Handler handler = new Handler();
+					handler.postDelayed(new Runnable() {
+						@Override
+						public void run() {
+							// Do something after 100ms
+							linearOpacity
+									.setBackgroundResource(R.color.transparent);
+						}
+					}, 750);
+
+				}
+
+			});
+
+			btnMenu.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					linearOpacity.setBackgroundResource(R.color.transparent2);
+
+					final Handler handler = new Handler();
+					handler.postDelayed(new Runnable() {
+						@Override
+						public void run() {
+							// Do something after 100ms
+							dialog.dismiss();
+							final Handler handler = new Handler();
+							handler.postDelayed(new Runnable() {
+								@Override
+								public void run() {
+									// Do something after 100ms
+									Intent activityMain = new Intent(
+											getBaseContext(),
+											MainActivity.class);
+									startActivity(activityMain);
+								}
+							}, 600);
+						}
+					}, 100);
+
+				}
+			});
+
+			btnTryAgain.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					// postWall("Estoy Compartiendo un Lidin");
+					linearOpacity.setBackgroundResource(R.color.transparent2);
+					final Handler handler = new Handler();
+					handler.postDelayed(new Runnable() {
+						@Override
+						public void run() {
+							// Do something after 100ms
+							dialog.dismiss();
+							final Handler handler = new Handler();
+							handler.postDelayed(new Runnable() {
+								@Override
+								public void run() {
+									// Do something after 100ms
+									finish();
+									startActivity(getIntent());
+								}
+							}, 600);
+						}
+					}, 100);
+				}
+			});
+
+			dialog.show();
+		}
+		final Handler handler = new Handler();
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				// Do something after 100ms
+				displayInterstitial();
+			}
+		}, 1000);
+	}
+
+	private void sendScoreToServer(boolean bestScore, int numberOfQuestion2) {
+		// TODO Auto-generated method stub
+		System.out.println("Actualizar puntuación: " + bestScore);
+		System.out.println("Logueado: " + sessionManager.isLoggedInFacebook());
+		if (sessionManager.isLoggedInFacebook() && bestScore == true) {
+			System.out.println("Enviar puntuación al servidor");
+			new UpdateScore().execute();
+		} else {
+			if (!sessionManager.isBestScoreSendToServer()
+					&& sessionManager.isLoggedInFacebook()) {
+				if (sessionManager.getBestScore() > 0)
+					new UpdateScore().execute();
+				System.out.println("Puntuación pendiente enviada");
+			}
+			System.out
+					.println("No se envía la puntuación porque no se ha logueado o no se ha superado la mejor puntuación");
+		}
+
+	}
+
+	protected void hideQuestion() {
+		// TODO Auto-generated method stub
+		firstAnswer.setVisibility(View.INVISIBLE);
+		secondAnswer.setVisibility(View.INVISIBLE);
+		thirdAnswer.setVisibility(View.INVISIBLE);
+		textQuestion.setVisibility(View.INVISIBLE);
+		categoryAnswer.setVisibility(View.VISIBLE);
+	}
+
+	private void startQuestionAnimations() {
+		System.out.println("Cargando animaciones pregunta");
+		firstAnswer.setVisibility(View.VISIBLE);
+		textQuestion.setVisibility(View.VISIBLE);
+		categoryAnswer.setVisibility(View.VISIBLE);
+		/*
+		 * TranslateAnimation slide = new TranslateAnimation(0, 0, 1000,0 );
+		 * slide.setDuration(1000); slide.setFillAfter(true);
+		 * firstAnswer.startAnimation(slide);
+		 */
+
+		firstAnswer.startAnimation(animMove);
+		textQuestion.startAnimation(animBounce);
+		categoryAnswer.startAnimation(animBounce);
+
+		// Secuencia de animación de carga de las respuestas
+		animMove.setAnimationListener(new AnimationListener() {
+			public void onAnimationStart(Animation animation) {
+			}
+
+			public void onAnimationRepeat(Animation animation) {
+			}
+
+			public void onAnimationEnd(Animation animation) {
+				firstAnswer.clearAnimation();
+				secondAnswer.setVisibility(View.VISIBLE);
+				secondAnswer.startAnimation(animMove2);
+				// text2.setVisibility(View.VISIBLE);
+
+			}
+		});
+
+		animMove2.setAnimationListener(new AnimationListener() {
+			public void onAnimationStart(Animation animation) {
+			}
+
+			public void onAnimationRepeat(Animation animation) {
+			}
+
+			public void onAnimationEnd(Animation animation) {
+				secondAnswer.clearAnimation();
+				thirdAnswer.setVisibility(View.VISIBLE);
+				thirdAnswer.startAnimation(animMove3);
+				// text2.setVisibility(View.VISIBLE);
+
+			}
+		});
+
+		animMove3.setAnimationListener(new AnimationListener() {
+			public void onAnimationStart(Animation animation) {
+			}
+
+			public void onAnimationRepeat(Animation animation) {
+			}
+
+			public void onAnimationEnd(Animation animation) {
+				thirdAnswer.clearAnimation();
+				// text2.setVisibility(View.VISIBLE);
+
+				thirdAnswer.setClickable(true);
+				secondAnswer.setClickable(true);
+				firstAnswer.setClickable(true);
+
+			}
+		});
+		startFrikiChrono();
+	}
+
+	protected void startFrikiChrono() {
+		// TODO Auto-generated method stub
+		textTimer.setText("30");
+		timeFrikiChrono = 30;
+		startTime = (long) timeFrikiChrono * 1000;
+		FrikiChrono = new FrikiChrono(startTime, interval);
+		final Handler handler = new Handler();
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				// Do something after 100ms
+
+				FrikiChrono.start();
+			}
+		}, 1500);
+
+	}
+
+	private void startNumQuestionAnimation() {
+		// TODO Auto-generated method stub
+		textNumQuestion.setVisibility(View.VISIBLE);
+		textNumQuestion.startAnimation(animZoomIn);
+	}
+
+	public class FrikiChrono extends CountDownTimer {
+		public FrikiChrono(long millisInFuture, long countDownInterval) {
+			super(millisInFuture, countDownInterval);
+			// TODO Auto-generated constructor stub
+			textTimer.setTextColor(getResources().getColor(R.color.white));
+			System.out.print("entra chrono");
+			FrikiChronoIsStart = true;
+		}
+
+		@Override
+		public void onFinish() {
+			textTimer.setTextColor(getResources().getColor(R.color.white));
+			textTimer.setText("");// Vaciamos contador
+			gameFinish(true);
+			FrikiChronoIsStart = false;
+		}
+
+		@Override
+		public void onTick(long millisUntilFinished) {
+			textTimer.setText("" + millisUntilFinished / 1000);
+			timeToAnswer = 30 - Math
+					.round((double) (millisUntilFinished / 1000));
+			System.out.println(millisUntilFinished / 1000);
+
+			if (millisUntilFinished / 1000 == 5) {
+				textTimer.setTextColor(getResources().getColor(R.color.red));
+			}
+		}
+	}
+
+	protected void saveCorrectAnswerQuestion(Question question2) {
+		// TODO Auto-generated method stub
+		ResumeLevel resumeLeve = new ResumeLevel();
+		resumeLeve.setQuestionId(question2.getQuestionId());
+		resumeLeve.setGenre(question2.getGenre());
+		resumeLeve.setDifficulty(question2.getDifficulty());
+		resumeLeve.setTimesAppeared(question.getTimesAppeared());
+		resumeLeve.setGoodQuestion(true);
+		resumeLevel.add(resumeLeve);
+
+	}
+
+	private void calculateScoreQuestion(Question question2, double timeAnswer) {
+		if (levelBoss) {
+			levelBoss = false;
+			numberOfBoss++;
+			double scoreBoss = Math.round((double) (1000 * numberOfBoss)
+					/ timeAnswer);
+			frikiadosScoreBoss = (int) (frikiadosScoreBoss + scoreBoss);
+			bossDefeated++;
+		} else {
+			double scoreAnswer = Math
+					.round((double) (10 * numberOfQuestion * question2
+							.getDifficulty()) / timeAnswer);
+			if (scoreAnswer < 0) {
+				scoreAnswer = 1;
+			}
+			frikiadosScore = (int) (frikiadosScore + scoreAnswer);
+		}
+		int scoreTextview = frikiadosScore + frikiadosScoreBoss;
+		userScore.setText(Integer.toString(scoreTextview) + "pts.");
+	}
+
+	protected void saveIncorrectAnswerQuestion(Question question2) {
+		// TODO Auto-generated method stub
+		ResumeLevel resumeLeve = new ResumeLevel();
+		resumeLeve.setQuestionId(question2.getQuestionId());
+		resumeLeve.setGenre(question2.getGenre());
+		resumeLeve.setDifficulty(question2.getDifficulty());
+		resumeLeve.setTimesAppeared(question.getTimesAppeared());
+		resumeLeve.setGoodQuestion(false);
+		resumeLevel.add(resumeLeve);
+	}
+
+	public void onBackPressed() {
+		AlertDialog.Builder dialogo1 = new AlertDialog.Builder(this);
+		dialogo1.setTitle("Frikiados");
+		dialogo1.setMessage("¿Seguro que deseas salir?");
+		dialogo1.setCancelable(false);
+
+		dialogo1.setPositiveButton("SI", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialogo1, int id) {
+				FrikiChrono.cancel();
+				finish();
+			}
+		});
+
+		dialogo1.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialogo1, int id) {
+				dialogo1.dismiss();
+			}
+		});
+
+		dialogo1.show();
+	}
+
+	public class UpdateScore extends AsyncTask<Void, String, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			dialog = new ProgressDialog(OnePlayerActivity.this);
+			dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			dialog.setCancelable(false);
+			dialog.setMessage("Cargando Ranking! Por favor espere unos segundos...!");
+			dialog.show();
+
+		}
+
+		@Override
+		protected Void doInBackground(Void... unused) {
+			HashMap<String, String> hashmap = sessionManager.getUserDetails();
+			String idFacebook = hashmap.get(SessionManager.KEY_FB_USER_ID);
+			String idUser = hashmap.get(SessionManager.KEY_ID_USER_FRIKIADOS);
+			result = RestfulWebService
+					.sendScore(idUser, idFacebook,
+							Integer.toString(sessionManager.getBestScore()),
+							Integer.toString(numberOfQuestion),
+							getApplicationContext());
+			// RestfulWebService.sendScore("4", "704489022", "200",
+			// getApplicationContext());
+			// RestfulWebService.updateUserProfile("4", "704489022",
+			// "jmaniviesa@gmail.com", "1985-09-07", "male", "supermani",
+			// getApplicationContext());
+			return (null);
+		}
+
+		@Override
+		protected void onPostExecute(Void unused) {
+
+			switch (result) {
+			case 0:
+				// NO HAY ERROR
+				try {
+					dialog.dismiss();
+					dialog = null;
+					sessionManager.setBestScoreSendToServer(true);
+					// goToTarget = false;
+				} catch (Exception e) {
+					// nothing
+				}
+				break;
+
+			case 1:
+				try {
+					dialog.dismiss();
+					dialog = null;
+					sessionManager.setBestScoreSendToServer(false);
+					// goToTarget = false;
+				} catch (Exception e) {
+					// nothing
+				}
+				// ERROR WEBSERVICE
+				System.out.println("Error WebService");
+				break;
+
+			case 2:
+				// ERROREXCEPTION
+				try {
+					dialog.dismiss();
+					dialog = null;
+					sessionManager.setBestScoreSendToServer(false);
+					// goToTarget = false;
+				} catch (Exception e) {
+					// nothing
+				}
+				System.out.println("Error Exception");
+
+				break;
+
+			default:
+				break;
+			}
+
+		}
+
+	}
+
+	public void displayInterstitial() {
+		if (interstitial.isLoaded()) {
+			interstitial.show();
+		} else {
+			Log.d("One Player", "Interstitial ad was not ready to be shown.");
+		}
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.one_player, menu);
+		return true;
+	}
+
+}

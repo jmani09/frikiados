@@ -1,0 +1,274 @@
+package com.appyuken.frikiados.menu;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.StringTokenizer;
+
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.StrictMode;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.appyuken.frikiados.R;
+import com.appyuken.frikiados.classes.SessionManager;
+import com.appyuken.frikiados.service.RestfulWebService;
+import com.facebook.FacebookAuthorizationException;
+import com.facebook.FacebookOperationCanceledException;
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.UiLifecycleHelper;
+import com.facebook.model.GraphUser;
+import com.facebook.widget.LoginButton;
+
+public class ProfileActivity extends FragmentActivity {
+
+	private final String PENDING_ACTION_BUNDLE_KEY = "com.facebook.samples.hellofacebook:PendingAction";
+
+	private LoginButton loginButton;
+	private PendingAction pendingAction = PendingAction.NONE;
+	private GraphUser user;
+	public static Session session;
+	private SessionManager sessionManagerFrikiados;
+	private EditText frikiadosNickName;
+	private EditText frikiadosEmail;
+	private EditText frikiadosSex;
+	private EditText frikiadosBirthDay;
+	private ImageView frikiadosProfileImage;
+	private ProgressDialog dialog = null;
+	private int numOfLifes;
+	private TextView textNumOfLifes;
+	private HashMap<String, String> hashmap;
+
+	private enum PendingAction {
+		NONE, POST_PHOTO, POST_STATUS_UPDATE
+	}
+
+	static UiLifecycleHelper uiHelper;
+
+	private Session.StatusCallback callback = new Session.StatusCallback() {
+		@Override
+		public void call(Session session, SessionState state,
+				Exception exception) {
+			onSessionStateChange(session, state, exception);
+		}
+	};
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_profile);
+		uiHelper = new UiLifecycleHelper(this, callback);
+		uiHelper.onCreate(savedInstanceState);
+
+		if (savedInstanceState != null) {
+			String name = savedInstanceState
+					.getString(PENDING_ACTION_BUNDLE_KEY);
+			pendingAction = PendingAction.valueOf(name);
+		}
+
+		setContentView(R.layout.activity_profile);
+
+		sessionManagerFrikiados = new SessionManager(getApplicationContext());
+		loginButton = (LoginButton) findViewById(R.id.login_button);
+
+		if (sessionManagerFrikiados.isLoggedInFacebook()) {
+			loginButton.setVisibility(View.GONE);
+		}
+
+		loginButton.setReadPermissions(Arrays.asList("user_likes",
+				"user_status", "email", "user_birthday"));
+		loginButton
+				.setUserInfoChangedCallback(new LoginButton.UserInfoChangedCallback() {
+					@Override
+					public void onUserInfoFetched(GraphUser user) {
+						ProfileActivity.this.user = user;
+						updateUI();
+					}
+				});
+
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		uiHelper.onResume();
+		updateUI();
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		uiHelper.onSaveInstanceState(outState);
+
+		outState.putString(PENDING_ACTION_BUNDLE_KEY, pendingAction.name());
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		uiHelper.onActivityResult(requestCode, resultCode, data);
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		uiHelper.onPause();
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		uiHelper.onDestroy();
+	}
+
+	private void onSessionStateChange(Session session, SessionState state,
+			Exception exception) {
+		if (pendingAction != PendingAction.NONE
+				&& (exception instanceof FacebookOperationCanceledException || exception instanceof FacebookAuthorizationException)) {
+			new AlertDialog.Builder(ProfileActivity.this)
+					.setTitle(R.string.cancelled)
+					.setMessage(R.string.permission_not_granted)
+					.setPositiveButton(R.string.ok, null).show();
+			pendingAction = PendingAction.NONE;
+		} else if (state == SessionState.OPENED_TOKEN_UPDATED) {
+
+		} else if (state.isClosed()) {
+			Toast.makeText(getBaseContext(), "Devinculando cuenta de Facebook",
+					Toast.LENGTH_LONG).show();
+			sessionManagerFrikiados.logoutUserFacebook();
+		}
+		updateUI();
+	}
+
+	@SuppressLint("SimpleDateFormat")
+	private void updateUI() {
+
+		session = Session.getActiveSession();
+		boolean enableButtons = (session != null && session.isOpened());
+		frikiadosNickName = (EditText) findViewById(R.id.editNickName);
+		frikiadosEmail = (EditText) findViewById(R.id.editEmail);
+		frikiadosSex = (EditText) findViewById(R.id.editSex);
+		frikiadosBirthDay = (EditText) findViewById(R.id.editBirthday);
+		frikiadosProfileImage = (ImageView) findViewById(R.id.frikiadosImageProfile);
+		textNumOfLifes= (TextView) findViewById(R.id.numOfLifes);
+		// Comprobar vidas para dejar jugar o no
+		hashmap = sessionManagerFrikiados.getUserDetails();
+		numOfLifes = Integer.parseInt(hashmap
+				.get(SessionManager.KEY_NUMBER_LIFES));
+		textNumOfLifes.setText("x  " + numOfLifes);
+
+		// pickFriendsButton.setEnabled(enableButtons);
+
+		if (enableButtons && user != null) {
+			loginButton.setVisibility(View.GONE);
+			if (!sessionManagerFrikiados.isLoggedInFacebook()) {
+				/*sessionManagerFrikiados.createLoginSessionWithFacebook(
+						user.getId(), user.getBirthday(),
+						user.asMap().get("gender").toString(), user.asMap()
+								.get("email").toString());*/
+				new frikiadosLoginAsyncTask().execute();
+			} else {
+				frikiadosNickName.setText(hashmap
+						.get(SessionManager.KEY_NICKNAME));
+				frikiadosEmail.setText(hashmap.get(SessionManager.KEY_EMAIL));
+				frikiadosSex.setText(hashmap.get(SessionManager.KEY_GENDER));
+				frikiadosBirthDay.setText(hashmap
+						.get(SessionManager.KEY_USER_BIRTHDAY));
+				frikiadosProfileImage.setImageBitmap(getFacebookProfilePicture(user.getId()));
+			}
+		}
+	}
+	// Clase Asíncrona
+		private class frikiadosLoginAsyncTask extends
+				AsyncTask<String, Integer, Integer> {
+
+			@Override
+			protected void onPreExecute() {
+				dialog = new ProgressDialog(ProfileActivity.this);
+				dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+				dialog.setCancelable(false);
+				dialog.setMessage("Validando sus datos...");
+				dialog.show();
+
+			}
+
+			protected Integer doInBackground(String... params) {
+				// Llamo al restfulwebservice
+				return  RestfulWebService.getLoginFacebook(
+						user.getId(), user.getUsername(), user.asMap().get("email")
+								.toString(),user.getBirthday(),user.asMap().get("gender").toString(), getApplicationContext());
+				
+
+
+			}
+
+			@Override
+			protected void onPostExecute(Integer result) {
+				super.onPostExecute(result);
+				Log.i("result", "" + result); // Pintamos por pantalla lo que nos
+												// devuelve por comprabación
+				HashMap<String, String> hashmap = sessionManagerFrikiados
+						.getUserDetails();
+				frikiadosNickName.setText(hashmap
+						.get(SessionManager.KEY_NICKNAME));
+				frikiadosEmail.setText(hashmap.get(SessionManager.KEY_EMAIL));
+				frikiadosSex.setText(hashmap.get(SessionManager.KEY_GENDER));
+				frikiadosBirthDay.setText(hashmap
+						.get(SessionManager.KEY_USER_BIRTHDAY));
+				frikiadosProfileImage.setImageBitmap(getFacebookProfilePicture(user.getId()));
+				
+				dialog.dismiss();
+			}
+
+		} // Fin Clase Asíncrona
+	
+	
+
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
+	@SuppressLint("NewApi")
+	public static Bitmap getFacebookProfilePicture(String userID) {
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+		StrictMode.setThreadPolicy(policy);
+
+		URL imageURL;
+		Bitmap bitmap = null;
+		try {
+			imageURL = new URL("https://graph.facebook.com/" + userID
+					+ "/picture?type=large");
+			bitmap = BitmapFactory.decodeStream(imageURL.openConnection()
+					.getInputStream());
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return bitmap;
+	}
+
+}

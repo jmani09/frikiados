@@ -1,0 +1,284 @@
+package com.appyuken.frikiados.classes;
+
+import java.util.HashMap;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+
+public class SessionManager {
+	// Shared Preferences
+	SharedPreferences pref;
+
+	// Editor for Shared preferences
+	Editor editor;
+
+	// Context
+	Context _context;
+
+	// Shared pref mode
+	int PRIVATE_MODE = 0;
+
+	// Sharedpref file name
+
+	private static final String IS_XML_FILES_CREATED = "IsXmlFilesCreated";
+	private static final String IS_BBDD_CREATED = "IsBBDDCreated";
+	private static final String PREF_NAME = "AndroidHivePref";
+	// All Shared Preferences Keys
+	private static final String IS_LOGIN = "IsLoggedIn";
+	private static final String IS_LOGINFACEBOOK = "IsLoggedInFacebook";
+
+	/******************************* LOGIN FRIKIADOS ***************************/
+	// User name (make variable public to access from outside)
+	public static final String KEY_NICKNAME = "nickname";
+	// Email address (make variable public to access from outside)
+	public static final String KEY_EMAIL = "email";
+	// User sex
+	public static final String KEY_GENDER = "gender";
+	// User name (make variable public to access from outside)
+	public static final String KEY_ID_USER_FRIKIADOS = "idUserFrikiados";
+	// User lifes game
+	public static final String KEY_NUMBER_LIFES = "numberOfLifes";
+	// User birthday
+	public static final String KEY_USER_BIRTHDAY = "birthday";
+	// User name (make variable public to access from outside)
+	public static final String KEY_COMMUNICATION_KEY = "communicationKey";
+	// User best score
+	public static final String KEY_BEST_SCORE = "bestScore";
+	/***********************************************************************/
+	/***********************************************************************/
+
+	/******************************* FACEBOOK ********************************/
+	// id user in Facebook (make variable public to access from outside)
+	public static final String KEY_FB_USER_ID = "fbUserId";
+
+	public static final String STATUS_ERROR = "error";
+	public static final Object STATUS_OK = "ok";
+
+	/***********************************************************************/
+	/***********************************************************************/
+
+	// Constructor
+	public SessionManager(Context context) {
+		this._context = context;
+		pref = _context.getSharedPreferences(PREF_NAME, PRIVATE_MODE); // Private_mode
+																		// means
+																		// that
+																		// only
+																		// the
+																		// application
+																		// creating
+																		// the
+																		// shared
+																		// preference
+																		// can
+																		// read/write
+																		// the
+																		// preference
+		editor = pref.edit();
+	}
+
+	/**
+	 * Create login session (Normal app login - without social networks)
+	 * */
+	public void createXMLFiles() {
+		// Storing create xmlf files value as TRUE
+		editor.putBoolean(IS_XML_FILES_CREATED, true);//
+		editor.commit();
+
+	}
+
+	public void createBBDD() {
+		// Storing create xmlf files value as TRUE
+		editor.putBoolean(IS_BBDD_CREATED, true);//
+		editor.commit();
+
+	}
+
+	public void createLoginSession(String email, String password,
+			String communicationKey, String idUser) {
+		// Storing login value as TRUE
+		editor.putBoolean(IS_LOGIN, true);// Sesi�n iniciada!
+
+		// Storing email in pref
+		editor.putString(KEY_EMAIL, email);
+
+		// Storing communicationKey in pref
+		editor.putString(KEY_COMMUNICATION_KEY, communicationKey);
+
+		// Storing id user lidinyu in pref
+		editor.putString(KEY_ID_USER_FRIKIADOS, idUser);
+
+		// commit changes
+		editor.commit();
+
+	}
+
+	/**
+	 * Create register session (Cuando el usuario se registra a trav�s del
+	 * formulario de registro, directamente le hacemos login al terminar el
+	 * registro)
+	 * */
+	public void createRegisterSession(String userName, String email,
+			String password, String communicationKey, String idUser) {
+		// Storing login value as TRUE
+		editor.putBoolean(IS_LOGIN, true);// Sesi�n iniciada!
+
+		// Storing userName in pref
+		editor.putString(KEY_NICKNAME, userName);
+
+		// Storing email in pref
+		editor.putString(KEY_EMAIL, email);
+
+		// Storing communicationKey in pref
+		editor.putString(KEY_COMMUNICATION_KEY, communicationKey);
+
+		// Storing id user lidinyu in pref
+		editor.putString(KEY_ID_USER_FRIKIADOS, idUser);
+
+		// commit changes
+		editor.commit();
+
+	}
+
+	/**
+	 * Check login method will check user login status If false it will redirect
+	 * user to login page Else won't do anything
+	 * */
+	/**
+	 * Get stored session data
+	 * */
+	public HashMap<String, String> getUserDetails() {
+		// HashMap pares de nombre propiedad, valor propiedad
+		HashMap<String, String> user = new HashMap<String, String>();
+
+		// user name
+		user.put(KEY_NICKNAME, pref.getString(KEY_NICKNAME, null));
+		// user email
+		user.put(KEY_EMAIL, pref.getString(KEY_EMAIL, null));
+		// id user frikiados
+		user.put(KEY_ID_USER_FRIKIADOS,
+				pref.getString(KEY_ID_USER_FRIKIADOS, null));
+		// number of lifes
+		user.put(KEY_NUMBER_LIFES, pref.getString(KEY_NUMBER_LIFES, "5"));
+		// user id on facebook
+		user.put(KEY_FB_USER_ID, pref.getString(KEY_FB_USER_ID, null));
+		// user gender
+		user.put(KEY_GENDER, pref.getString(KEY_GENDER, null));
+		// user birthday
+		user.put(KEY_USER_BIRTHDAY, pref.getString(KEY_USER_BIRTHDAY, null));
+		//user best socre
+		user.put(KEY_BEST_SCORE, pref.getString(KEY_BEST_SCORE, "0"));
+
+		// return user
+		return user;
+	}
+
+	/**
+	 * Clear session details
+	 * */
+	public void logoutUserFacebook() {
+		// Clearing all data from Shared Preferences
+		editor.putBoolean(IS_LOGINFACEBOOK, false);
+		// editor.clear();
+		editor.commit();
+	}
+
+	/**
+	 * Quick check for login
+	 * **/
+	public boolean isCreateXMLFiles() {
+		return pref.getBoolean(IS_XML_FILES_CREATED, false);// Si está vacia la
+															// variable
+		// devuelve false por defecto
+	}
+
+	public boolean isCreateBBDD() {
+		return pref.getBoolean(IS_BBDD_CREATED, false);// Si está vacia la
+														// variable
+		// devuelve false por defecto
+	}
+
+	// Get Login State
+	public boolean isLoggedIn() {
+		return pref.getBoolean(IS_LOGIN, false);// Si está vacia la variable
+												// devuelve false por defecto
+	}
+
+	public boolean isLoggedInFacebook() {
+		return pref.getBoolean(IS_LOGINFACEBOOK, false);// Si está vacia la
+														// variable
+		// devuelve false por defecto
+	}
+
+	public String getNumberOfLifes() {
+		return pref.getString(KEY_NUMBER_LIFES, "");
+	}
+
+	/**
+	 * Create login session for Facebook Login
+	 * 
+	 * @param email
+	 * @param fbSex
+	 * */
+	public void createLoginSessionFrikiados(String fbId, String fbBirthday,
+			String fbGender, String email, String frikiadosId) {
+		// Storing login value as TRUE
+		editor.putBoolean(IS_LOGINFACEBOOK, true);
+
+		// Storing facebook user id in pref
+		editor.putString(KEY_FB_USER_ID, fbId);
+
+		// Storing facebook birthday name in pref
+		editor.putString(KEY_USER_BIRTHDAY, fbBirthday);
+		// Storing facebook email in pref
+		editor.putString(KEY_EMAIL, email);
+		// Storing facebook gender in pref
+		editor.putString(KEY_GENDER, fbGender);
+		// Storing id frikaidos in pref
+		editor.putString(KEY_ID_USER_FRIKIADOS, frikiadosId);
+
+		// commit changes
+		editor.commit();
+
+	}
+
+	public void updateProfileFrikiados(String userBirthday,
+			String userNickname, String userGender, String userEmail) {
+		// Storing new values for user profile
+
+		// Storing new birthday in pref
+		editor.putString(KEY_USER_BIRTHDAY, userBirthday);
+		// Storing new email in pref
+		editor.putString(KEY_EMAIL, userEmail);
+		// Storing new gender in pref
+		editor.putString(KEY_GENDER, userGender);
+		// Storing new nickname in pref
+		editor.putString(KEY_NICKNAME, userNickname);
+		// commit changes
+		editor.commit();
+	}
+
+	public void updateBestScore(String bestScore) {
+		//Update bestScore only score is best than last
+		int lastScore = Integer.parseInt(pref.getString(KEY_BEST_SCORE, "0"));
+		int newScore = Integer.parseInt(bestScore);
+		if (newScore > lastScore) {
+			// update bestScore
+			System.out.println("puntuación mejor");
+			editor.putString(KEY_BEST_SCORE, bestScore);
+			// comit changes
+			editor.commit();
+		}else{
+			System.out.println("puntuación igual o peor");
+		}
+	}
+
+	public void updateLifes(int newLifes) {
+		// TODO Auto-generated method stub
+		editor.putString(KEY_NUMBER_LIFES, String.valueOf(newLifes));
+		editor.commit();
+
+	}
+
+}

@@ -1,0 +1,63 @@
+package com.appyuken.frikiados.classes;
+
+import java.io.Serializable;
+
+public class Score implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	private String userNickname;
+	private String userScore;
+	private String dateCreation;
+	private String userAnswerScore;
+	private String idFacebook;
+
+	public Score() {
+		super();
+	}
+	public String getIdFacebook() {
+		return idFacebook;
+	}
+
+	public void setIdFacebook(String idFacebook) {
+		this.idFacebook = idFacebook;
+	}
+	
+	
+	public String getUserNickname() {
+		return userNickname;
+	}
+
+	public void setUserNickName(String userNickname) {
+		this.userNickname = userNickname;
+	}
+	public String getUserScore() {
+		return userScore;
+	}
+
+	public void setUserScore(String userScore) {
+		this.userScore = userScore;
+	}
+	public String getUserAnswerScore() {
+		return userAnswerScore;
+	}
+
+	public void setUserAnswerScore(String userAnswerScore) {
+		this.userAnswerScore = userAnswerScore;
+	}
+	
+	public String getDateCreation() {
+		return dateCreation;
+	}
+
+	public void setDateCreation(String dateCreation) {
+		this.dateCreation = dateCreation;
+	}
+
+
+	@Override
+	public String toString() {
+		return "Score [nickname=" + userNickname + ", score=" + userScore + ", dateCreation=" + dateCreation
+				+ idFacebook + "]";
+	}
+}

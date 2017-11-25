@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#80000000"
+    android:gravity="center"
+    tools:context=".SelectWorld" >
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <LinearLayout
+            android:id="@+id/linearSettings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_dialog"
+            android:orientation="vertical" 
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/textPopUp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/settings"
+                android:contentDescription="@+id/frikiadosImage"
+                android:gravity="center" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:layout_marginTop="10dp" >
+
+                <Button
+                    android:id="@+id/btnMusic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/music_on" />
+
+                <Button
+                    android:id="@+id/btnSoundEffects"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:background="@drawable/sound_on" />
+            </LinearLayout>
+
+            <Button
+                style="@style/text"
+                android:id="@+id/btnCredits"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_btn_settings"
+                android:text="@string/btnCredits"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp" />
+
+            <Button
+                style="@style/text"
+                android:id="@+id/btnOtherApps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_btn_settings"
+                android:text="@string/btnOtherApps" 
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"/>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/butnClose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignRight="@+id/linearSettings"
+            android:background="@drawable/cerrar"
+            android:contentDescription="@string/frikiadosImage" />
+
+    </RelativeLayout>
+
+</LinearLayout>

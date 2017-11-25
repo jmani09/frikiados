@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#D0000000"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context=".SelectWorld" >
+
+    <LinearLayout
+        android:id="@+id/question"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.15"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/titleChooseCategory"
+            style="@style/question"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/chooseCategory" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/chooseCategory"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.15"
+        android:gravity="center|center_horizontal"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/btnComic"
+            style="@style/question"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/icono_categoria_comic"
+			android:gravity="center" />
+
+        <Button
+            android:id="@+id/btnManga"
+            style="@style/question"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/icono_categoria_manga"
+            android:gravity="center" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/chooseCategory2"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.15"
+        android:gravity="center|center_horizontal"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/btnSeries"
+            style="@style/question"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/icono_categoria_serie"
+			android:gravity="center" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/chooseCategory3"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.15"
+        android:gravity="center|center_horizontal"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/btnPeliculas"
+            style="@style/question"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/icono_categoria_peliculas"
+			android:gravity="center" />
+
+        <Button
+            android:id="@+id/btnJuego"
+            style="@style/question"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/icono_categoria_juego"
+            android:gravity="center" />
+    </LinearLayout>
+
+</LinearLayout>

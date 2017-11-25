@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#D0000000"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context=".SelectWorld" >
+
+    <ImageView
+        android:id="@+id/logoFrikiados"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:layout_marginTop="50dp"
+        android:background="@drawable/salir"
+        android:contentDescription="@+id/frikiadosImage" />
+
+    <LinearLayout
+        android:id="@+id/question"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.15"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/titleExit"
+            style="@style/question"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/titleExit" />
+
+        <TextView
+            android:id="@+id/textExit"
+            style="@style/question"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/textExit" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/answer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.2"
+        android:gravity="top|center_horizontal"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/btnExit"
+            style="@style/question"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/background_btn_exit_selector"
+			android:gravity="center"
+			android:text="@string/exit" />
+
+        <Button
+            android:id="@+id/btnContinue"
+            style="@style/question"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_btn_continue_selector"
+            android:gravity="center"
+            android:text="@string/noexit" />
+    </LinearLayout>
+
+</LinearLayout>
